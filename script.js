@@ -1,10 +1,10 @@
 // ═══════════════════════════════════════════════════
 //  BON REQUEST SYSTEM – Frontend Script (Supabase)
 // ═══════════════════════════════════════════════════
-//  Kolom tabel bons:
-//    nama_pemohon, applicant_nip, jumlah_total,
-//    items (JSONB), status, lpj_file, lpj_description,
-//    created_at, id
+//  Tabel: bon       → id, applicant_name, applicant_nip,
+//                      total_amount, status, lpj_file,
+//                      lpj_description, created_at, updated_at
+//  Tabel: bon_items → id, bon_id, name, amount, purpose
 //  Requires: supabase.js di-load sebelum file ini
 
 // ── Auth Guard ───────────────────────────────────────
@@ -190,6 +190,7 @@ document.getElementById("addItemBtn").addEventListener("click", addItem);
 addItem();
 
 // ── Submit Bon ───────────────────────────────────────
+// Alur: POST ke tabel 'bon' dulu → dapat id → POST tiap item ke 'bon_items'
 document.getElementById("submitBonBtn").addEventListener("click", async () => {
   const errorDiv   = document.getElementById("createError");
   const successDiv = document.getElementById("createSuccess");
@@ -198,10 +199,10 @@ document.getElementById("submitBonBtn").addEventListener("click", async () => {
   errorDiv.classList.add("hidden");
   successDiv.classList.add("hidden");
 
-  const pemohonNama = document.getElementById("applicantSelectNama").value;
-  const pemohonNip  = document.getElementById("applicantSelectNip").value;
+  const applicantName = document.getElementById("applicantSelectNama").value;
+  const applicantNip  = document.getElementById("applicantSelectNip").value;
 
-  if (!pemohonNama) {
+  if (!applicantName) {
     errorDiv.textContent = "Pilih nama pemohon terlebih dahulu.";
     errorDiv.classList.remove("hidden");
     return;
@@ -230,13 +231,26 @@ document.getElementById("submitBonBtn").addEventListener("click", async () => {
   btn.textContent = "Memproses...";
 
   try {
-    await sbPost("bons", {
-      nama_pemohon:  pemohonNama,
-      applicant_nip: pemohonNip,
-      items:         items,
-      jumlah_total:  items.reduce((s, i) => s + i.amount, 0),
-      status:        "submitted",
+    const totalAmount = items.reduce((s, i) => s + i.amount, 0);
+
+    // 1. Simpan header bon
+    const bon = await sbPost("bon", {
+      applicant_name: applicantName,
+      applicant_nip:  applicantNip,
+      total_amount:   totalAmount,
+      status:         "submitted",
     });
+
+    // 2. Simpan tiap item dengan bon_id yang baru didapat
+    const bonId = bon.id;
+    for (const item of items) {
+      await sbPost("bon_items", {
+        bon_id:  bonId,
+        name:    item.name,
+        amount:  item.amount,
+        purpose: item.purpose,
+      });
+    }
 
     successDiv.textContent = "✅ Bon berhasil diajukan!";
     successDiv.classList.remove("hidden");
@@ -260,6 +274,7 @@ document.getElementById("submitBonBtn").addEventListener("click", async () => {
 // ═══════════════════════════════════════════════════
 //  LOAD & RENDER BON TABLE
 // ═══════════════════════════════════════════════════
+// Supabase PostgREST: join bon_items via foreign key dengan select embed
 
 async function loadBons() {
   const tbody    = document.getElementById("bonTableBody");
@@ -268,7 +283,11 @@ async function loadBons() {
   errorDiv.classList.add("hidden");
 
   try {
-    const bons = await sbGet("bons", "select=*&order=created_at.desc");
+    // Ambil bon beserta items-nya sekaligus (PostgREST resource embedding)
+    const bons = await sbGet(
+      "bon",
+      "select=*,bon_items(id,name,amount,purpose)&order=created_at.desc"
+    );
 
     if (!bons.length) {
       tbody.innerHTML = `<tr><td colspan="7" class="loading-row">Belum ada pengajuan bon.</td></tr>`;
@@ -277,6 +296,8 @@ async function loadBons() {
 
     tbody.innerHTML = "";
     bons.forEach((bon, index) => {
+      const items = bon.bon_items || [];
+
       const tr = document.createElement("tr");
       tr.className = "bon-row";
       tr.innerHTML = `
@@ -285,20 +306,19 @@ async function loadBons() {
           ${index + 1}
         </td>
         <td>
-          <strong>${escHtml(bon.nama_pemohon)}</strong>
+          <strong>${escHtml(bon.applicant_name)}</strong>
           ${bon.applicant_nip ? `<br><small style="color:var(--text-muted);font-size:11px;">NIP: ${escHtml(bon.applicant_nip)}</small>` : ""}
         </td>
-        <td style="font-family:var(--font-mono);font-weight:500;">${formatRupiah(bon.jumlah_total)}</td>
+        <td style="font-family:var(--font-mono);font-weight:500;">${formatRupiah(bon.total_amount)}</td>
         <td><span class="badge badge-${bon.status}">${statusLabel(bon.status)}</span></td>
         <td>${renderLpj(bon)}</td>
         <td>${formatDate(bon.created_at)}</td>
         <td class="actions-cell">${renderActions(bon)}</td>
       `;
 
-      // Detail row (items)
+      // Detail row — tampilkan bon_items
       const trDetail = document.createElement("tr");
       trDetail.className = "bon-detail-row hidden";
-      const items = Array.isArray(bon.items) ? bon.items : JSON.parse(bon.items || "[]");
       trDetail.innerHTML = `
         <td colspan="7">
           <div class="detail-panel">
@@ -307,19 +327,19 @@ async function loadBons() {
                 <tr><th>#</th><th>Nama Item</th><th>Keperluan</th><th style="text-align:right;">Jumlah</th></tr>
               </thead>
               <tbody>
-                ${items.map((item, idx) => `
+                ${items.length ? items.map((item, idx) => `
                   <tr>
                     <td>${idx + 1}</td>
                     <td>${escHtml(item.name)}</td>
                     <td>${escHtml(item.purpose)}</td>
                     <td style="text-align:right;font-family:var(--font-mono);font-weight:500;">${formatRupiah(item.amount)}</td>
                   </tr>
-                `).join("")}
+                `).join("") : `<tr><td colspan="4" style="text-align:center;color:var(--text-muted);">Tidak ada item</td></tr>`}
               </tbody>
               <tfoot>
                 <tr>
                   <td colspan="3" style="text-align:right;font-weight:600;color:var(--text-secondary);">TOTAL</td>
-                  <td style="text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--blue);">${formatRupiah(bon.jumlah_total)}</td>
+                  <td style="text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--blue);">${formatRupiah(bon.total_amount)}</td>
                 </tr>
               </tfoot>
             </table>
@@ -328,6 +348,7 @@ async function loadBons() {
         </td>
       `;
 
+      // Toggle detail row
       tr.addEventListener("click", (e) => {
         if (e.target.closest("button") || e.target.closest("a")) return;
         const isOpen = !trDetail.classList.contains("hidden");
@@ -374,16 +395,23 @@ function renderActions(bon) {
     btns.push(`<button class="btn btn-sm btn-lpj" onclick="openLpjModal('${bon.id}')">📄 Upload LPJ</button>`);
 
   if (["ppk","kalapas","bendahara","admin"].includes(user.role))
-    btns.push(`<button class="btn btn-sm btn-delete" onclick="deleteBon('${bon.id}',\`${escHtml(bon.nama_pemohon)}\`)">🗑 Hapus</button>`);
+    btns.push(`<button class="btn btn-sm btn-delete" onclick="deleteBon('${bon.id}',\`${escHtml(bon.applicant_name)}\`)">🗑 Hapus</button>`);
 
   return btns.join("") || `<span style="color:var(--text-muted);font-size:12px;">–</span>`;
 }
 
 // ── Delete Bon ───────────────────────────────────────
+// Hapus items dulu baru header (foreign key constraint)
 async function deleteBon(id, name) {
   if (!confirm(`Hapus bon milik "${name}"?\n\nData akan dihapus permanen.`)) return;
   try {
-    await sbDelete("bons", id);
+    // Hapus semua bon_items terkait dulu
+    await fetch(`${SUPA_URL}/rest/v1/bon_items?bon_id=eq.${id}`, {
+      method: "DELETE",
+      headers: { ...SB_HEADERS, "Prefer": "return=minimal" },
+    });
+    // Baru hapus bon-nya
+    await sbDelete("bon", id);
     loadBons();
   } catch (err) { alert("Error: " + err.message); }
 }
@@ -392,7 +420,7 @@ async function deleteBon(id, name) {
 async function updateStatus(id, status) {
   if (!confirm(`Konfirmasi ubah status menjadi: "${statusLabel(status)}"?`)) return;
   try {
-    await sbPatch("bons", id, { status });
+    await sbPatch("bon", id, { status });
     loadBons();
   } catch (err) { alert("Error: " + err.message); }
 }
@@ -469,8 +497,8 @@ document.getElementById("submitLpjBtn").addEventListener("click", async () => {
     // 1. Upload file ke Supabase Storage bucket 'lpj-files'
     const filename = await sbUploadFile("lpj-files", file);
 
-    // 2. Update dua kolom terpisah: lpj_file dan lpj_description
-    await sbPatch("bons", bonId, {
+    // 2. Update kolom lpj_file, lpj_description, dan status di tabel bon
+    await sbPatch("bon", bonId, {
       lpj_file:        filename,
       lpj_description: description,
       status:          "completed",
