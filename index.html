@@ -112,6 +112,85 @@
       </div>
     </div>
 
+    <!-- ── Dashboard Bendahara ── -->
+    <section class="card hidden" id="dashboardSection">
+      <div class="card-header">
+        <h2>📊 Ringkasan Transaksi Pengajuan</h2>
+        <button class="btn btn-sm btn-outline" id="refreshDashboardBtn">↻ Refresh</button>
+      </div>
+      <div class="card-body">
+        <div class="dashboard-grid" id="dashboardGrid">
+          <!-- Tab Filter -->
+          <div class="dashboard-tabs" id="dashboardTabs">
+            <button class="dash-tab active" data-filter="all">Semua</button>
+            <button class="dash-tab" data-filter="submitted">Proses PPK</button>
+            <button class="dash-tab" data-filter="approved_ppk">Proses Kalapas</button>
+            <button class="dash-tab" data-filter="approved_kalapas">Menunggu Pencairan</button>
+            <button class="dash-tab" data-filter="disbursed_nolpj">Belum LPJ</button>
+            <button class="dash-tab" data-filter="completed">Sudah LPJ</button>
+            <button class="dash-tab" data-filter="rejected">Ditolak</button>
+          </div>
+
+          <!-- Stat Cards -->
+          <div class="dash-cards">
+            <div class="dash-card dash-card--blue" id="statSubmitted">
+              <div class="dash-card-icon">⏳</div>
+              <div class="dash-card-body">
+                <div class="dash-card-count" id="countSubmitted">–</div>
+                <div class="dash-card-label">Menunggu Persetujuan PPK</div>
+              </div>
+            </div>
+            <div class="dash-card dash-card--green" id="statApprovedPpk">
+              <div class="dash-card-icon">✅</div>
+              <div class="dash-card-body">
+                <div class="dash-card-count" id="countApprovedPpk">–</div>
+                <div class="dash-card-label">Menunggu Persetujuan Kalapas</div>
+              </div>
+            </div>
+            <div class="dash-card dash-card--amber" id="statApprovedKalapas">
+              <div class="dash-card-icon">💰</div>
+              <div class="dash-card-body">
+                <div class="dash-card-count" id="countApprovedKalapas">–</div>
+                <div class="dash-card-label">Menunggu Pencairan Dana</div>
+              </div>
+            </div>
+            <div class="dash-card dash-card--orange" id="statNolpj">
+              <div class="dash-card-icon">📂</div>
+              <div class="dash-card-body">
+                <div class="dash-card-count" id="countNolpj">–</div>
+                <div class="dash-card-label">Belum Upload LPJ</div>
+              </div>
+            </div>
+            <div class="dash-card dash-card--teal" id="statCompleted">
+              <div class="dash-card-icon">📄</div>
+              <div class="dash-card-body">
+                <div class="dash-card-count" id="countCompleted">–</div>
+                <div class="dash-card-label">Sudah Upload LPJ</div>
+              </div>
+            </div>
+            <div class="dash-card dash-card--red" id="statRejected">
+              <div class="dash-card-icon">🚫</div>
+              <div class="dash-card-body">
+                <div class="dash-card-count" id="countRejected">–</div>
+                <div class="dash-card-label">Pengajuan Ditolak</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- List Preview -->
+          <div class="dash-list-wrap">
+            <div class="dash-list-header">
+              <span id="dashListTitle">Semua Pengajuan</span>
+              <span class="dash-list-count" id="dashListCount"></span>
+            </div>
+            <div id="dashListBody" class="dash-list-body">
+              <div class="dash-list-loading">Memuat data...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- ── Bon Table ── -->
     <section class="card">
       <div class="card-header">

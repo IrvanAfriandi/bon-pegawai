@@ -519,6 +519,136 @@ document.getElementById("submitLpjBtn").addEventListener("click", async () => {
   }
 });
 
+
 // ── Refresh & Init ────────────────────────────────────
 document.getElementById("refreshBtn").addEventListener("click", loadBons);
 loadBons();
+
+// ═══════════════════════════════════════════════════
+//  DASHBOARD BENDAHARA
+// ═══════════════════════════════════════════════════
+
+if (user.role === "bendahara") {
+  const dashSection = document.getElementById("dashboardSection");
+  dashSection.classList.remove("hidden");
+
+  let allBons = [];
+  let activeFilter = "all";
+
+  const filterLabels = {
+    all:             "Semua Pengajuan",
+    submitted:       "Menunggu Persetujuan PPK",
+    approved_ppk:    "Menunggu Persetujuan Kalapas",
+    approved_kalapas:"Menunggu Pencairan Dana",
+    disbursed_nolpj: "Belum Upload LPJ",
+    completed:       "Sudah Upload LPJ",
+    rejected:        "Ditolak",
+  };
+
+  async function loadDashboard() {
+    document.getElementById("dashListBody").innerHTML =
+      `<div class="dash-list-loading">Memuat data...</div>`;
+
+    try {
+      allBons = await sbGet("bon", "select=*,bon_items(id,name,amount,purpose)&order=created_at.desc");
+      updateCounts();
+      renderList(activeFilter);
+    } catch (err) {
+      document.getElementById("dashListBody").innerHTML =
+        `<div class="dash-list-loading" style="color:var(--red);">Gagal memuat: ${err.message}</div>`;
+    }
+  }
+
+  function filterBons(filter) {
+    switch (filter) {
+      case "submitted":        return allBons.filter(b => b.status === "submitted");
+      case "approved_ppk":     return allBons.filter(b => b.status === "approved_ppk");
+      case "approved_kalapas": return allBons.filter(b => b.status === "approved_kalapas");
+      case "disbursed_nolpj":  return allBons.filter(b => b.status === "disbursed" && !b.lpj_file);
+      case "completed":        return allBons.filter(b => b.status === "completed");
+      case "rejected":         return allBons.filter(b => b.status === "rejected");
+      default:                 return allBons;
+    }
+  }
+
+  function updateCounts() {
+    document.getElementById("countSubmitted").textContent        = allBons.filter(b => b.status === "submitted").length;
+    document.getElementById("countApprovedPpk").textContent      = allBons.filter(b => b.status === "approved_ppk").length;
+    document.getElementById("countApprovedKalapas").textContent  = allBons.filter(b => b.status === "approved_kalapas").length;
+    document.getElementById("countNolpj").textContent            = allBons.filter(b => b.status === "disbursed" && !b.lpj_file).length;
+    document.getElementById("countCompleted").textContent        = allBons.filter(b => b.status === "completed").length;
+    document.getElementById("countRejected").textContent         = allBons.filter(b => b.status === "rejected").length;
+  }
+
+  function renderList(filter) {
+    activeFilter = filter;
+    const list = filterBons(filter);
+    const body = document.getElementById("dashListBody");
+    document.getElementById("dashListTitle").textContent = filterLabels[filter] || "Semua Pengajuan";
+    document.getElementById("dashListCount").textContent = list.length + " pengajuan";
+
+    if (!list.length) {
+      body.innerHTML = `<div class="dash-list-loading">Tidak ada data untuk kategori ini.</div>`;
+      return;
+    }
+
+    body.innerHTML = list.map(bon => `
+      <div class="dash-list-item">
+        <div class="dash-list-meta">
+          <span class="dash-list-name">${escHtml(bon.applicant_name)}</span>
+          ${bon.applicant_nip ? `<span class="dash-list-nip">NIP: ${escHtml(bon.applicant_nip)}</span>` : ""}
+          <span class="dash-list-date">${formatDate(bon.created_at)}</span>
+        </div>
+        <div class="dash-list-right">
+          <span class="dash-list-amount">${formatRupiah(bon.total_amount)}</span>
+          <span class="badge badge-${bon.status}">${statusLabel(bon.status)}</span>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  // Tab click
+  document.querySelectorAll(".dash-tab").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".dash-tab").forEach(t => t.classList.remove("active"));
+      btn.classList.add("active");
+      // Sync stat card active state
+      const filterMap = {
+        submitted:        "statSubmitted",
+        approved_ppk:     "statApprovedPpk",
+        approved_kalapas: "statApprovedKalapas",
+        disbursed_nolpj:  "statNolpj",
+        completed:        "statCompleted",
+        rejected:         "statRejected",
+      };
+      document.querySelectorAll(".dash-card").forEach(c => c.classList.remove("active"));
+      const cardId = filterMap[btn.dataset.filter];
+      if (cardId) document.getElementById(cardId)?.classList.add("active");
+      renderList(btn.dataset.filter);
+    });
+  });
+
+  // Stat card click → filter
+  const cardFilterMap = {
+    statSubmitted:        "submitted",
+    statApprovedPpk:      "approved_ppk",
+    statApprovedKalapas:  "approved_kalapas",
+    statNolpj:            "disbursed_nolpj",
+    statCompleted:        "completed",
+    statRejected:         "rejected",
+  };
+  Object.entries(cardFilterMap).forEach(([cardId, filter]) => {
+    document.getElementById(cardId)?.addEventListener("click", () => {
+      // Sync tab
+      document.querySelectorAll(".dash-tab").forEach(t => {
+        t.classList.toggle("active", t.dataset.filter === filter);
+      });
+      document.querySelectorAll(".dash-card").forEach(c => c.classList.remove("active"));
+      document.getElementById(cardId).classList.add("active");
+      renderList(filter);
+    });
+  });
+
+  document.getElementById("refreshDashboardBtn").addEventListener("click", loadDashboard);
+  loadDashboard();
+}
