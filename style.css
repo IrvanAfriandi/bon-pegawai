@@ -574,6 +574,9 @@ select {
 .btn-delete       { background: var(--red-light);    color: var(--red);    border-color: var(--red-mid); }
 .btn-delete:hover:not(:disabled)       { background: var(--red-mid); border-color: #fca5a5; }
 
+.btn-reject       { background: #fff1f2; color: #c53030; border-color: #fecdd3; }
+.btn-reject:hover:not(:disabled)       { background: #fed7d7; border-color: #fc8181; }
+
 .btn-lpj {
   background: var(--teal-light);
   color: var(--teal);
@@ -614,6 +617,8 @@ select {
 .badge-disbursed::before { background: var(--amber); }
 .badge-completed        { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
 .badge-completed::before { background: #6b7280; }
+.badge-rejected         { background: #fff1f2; color: #e53e3e; border: 1px solid #fecdd3; }
+.badge-rejected::before  { background: #e53e3e; }
 
 /* ══════════════════════════════════════════════════════
    TABLE
@@ -761,6 +766,17 @@ select {
   border-radius: var(--radius-sm);
   font-size: 12px;
   color: var(--teal);
+}
+
+.detail-reject-note {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: #fff1f2;
+  border-left: 3px solid #e53e3e;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  color: #c53030;
+  font-weight: 500;
 }
 
 /* ══════════════════════════════════════════════════════

@@ -69,9 +69,10 @@ const bonSchema = new mongoose.Schema(
     totalAmount: { type: Number, default: 0 },
     status: {
       type: String,
-      enum: ["submitted","approved_ppk","approved_kalapas","disbursed","completed"],
+      enum: ["submitted","approved_ppk","approved_kalapas","disbursed","completed","rejected"],
       default: "submitted",
     },
+    rejectionReason: { type: String, default: "" },
     lpj: {
       description: { type: String, default: "" },
       file:        { type: String, default: "" },
@@ -267,12 +268,26 @@ app.post("/bon", async (req, res) => {
 
 app.patch("/bon/:id/status", async (req, res) => {
   try {
-    const valid = ["submitted","approved_ppk","approved_kalapas","disbursed","completed"];
+    const valid = ["submitted","approved_ppk","approved_kalapas","disbursed","completed","rejected"];
     if (!valid.includes(req.body.status)) return res.status(400).json({ error: "Status tidak valid." });
     const bon = await Bon.findByIdAndUpdate(req.params.id, { status: req.body.status }, { new: true });
     if (!bon) return res.status(404).json({ error: "Bon tidak ditemukan." });
     res.json({ success: true, bon });
   } catch { res.status(500).json({ error: "Gagal mengubah status." }); }
+});
+
+app.patch("/bon/:id/reject", async (req, res) => {
+  try {
+    const { reason } = req.body;
+    if (!reason || !reason.trim()) return res.status(400).json({ error: "Alasan penolakan wajib diisi." });
+    const bon = await Bon.findByIdAndUpdate(
+      req.params.id,
+      { status: "rejected", rejectionReason: reason.trim() },
+      { new: true }
+    );
+    if (!bon) return res.status(404).json({ error: "Bon tidak ditemukan." });
+    res.json({ success: true, bon });
+  } catch { res.status(500).json({ error: "Gagal menolak bon." }); }
 });
 
 app.post("/lpj/:id", upload.single("file"), async (req, res) => {

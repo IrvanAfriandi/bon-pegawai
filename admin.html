@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin – Manajemen User</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 
@@ -327,15 +328,26 @@
       if (users.length <= 1) {
         const target = await sbGet("users", `select=role&id=eq.${id}`);
         if (target[0]?.role === "admin") {
-          alert("Tidak bisa menghapus satu-satunya akun admin.");
+          Swal.fire({ title: "Tidak Diizinkan", text: "Tidak bisa menghapus satu-satunya akun admin.", icon: "error" });
           return;
         }
       }
-      if (!confirm(`Hapus user "${username}"? Tindakan ini tidak bisa dibatalkan.`)) return;
+      const result = await Swal.fire({
+        title: "Hapus User?",
+        html: `User <strong>${username}</strong> akan dihapus permanen.`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#e53e3e",
+        cancelButtonColor: "#718096",
+        confirmButtonText: "Ya, Hapus!",
+        cancelButtonText: "Batal",
+      });
+      if (!result.isConfirmed) return;
       try {
         await sbDelete("users", id);
+        await Swal.fire({ title: "Terhapus!", text: "User berhasil dihapus.", icon: "success", timer: 1500, showConfirmButton: false });
         loadUsers();
-      } catch (err) { alert("Error: " + err.message); }
+      } catch (err) { Swal.fire({ title: "Error", text: err.message, icon: "error" }); }
     }
 
     document.getElementById("refreshUsersBtn").addEventListener("click", loadUsers);
@@ -456,11 +468,22 @@
     }
 
     async function deletePegawai(id, nama) {
-      if (!confirm(`Hapus pegawai "${nama}"? Tindakan ini tidak bisa dibatalkan.`)) return;
+      const result = await Swal.fire({
+        title: "Hapus Pegawai?",
+        html: `Pegawai <strong>${nama}</strong> akan dihapus permanen.`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#e53e3e",
+        cancelButtonColor: "#718096",
+        confirmButtonText: "Ya, Hapus!",
+        cancelButtonText: "Batal",
+      });
+      if (!result.isConfirmed) return;
       try {
         await sbDelete("pegawai", id);
+        await Swal.fire({ title: "Terhapus!", text: "Pegawai berhasil dihapus.", icon: "success", timer: 1500, showConfirmButton: false });
         loadPegawai(document.getElementById("pegawaiSearchAdmin").value.trim());
-      } catch (err) { alert("Error: " + err.message); }
+      } catch (err) { Swal.fire({ title: "Error", text: err.message, icon: "error" }); }
     }
 
     document.getElementById("refreshPegawaiBtn").addEventListener("click", () => {

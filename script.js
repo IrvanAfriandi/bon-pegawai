@@ -30,6 +30,7 @@ function statusLabel(status) {
     approved_kalapas: "Disetujui Kalapas",
     disbursed:        "Dicairkan",
     completed:        "Selesai (LPJ)",
+    rejected:         "Ditolak",
   };
   return labels[status] || status;
 }
@@ -344,6 +345,7 @@ async function loadBons() {
               </tfoot>
             </table>
             ${bon.lpj_description ? `<div class="detail-lpj-note">📝 Keterangan LPJ: ${escHtml(bon.lpj_description)}</div>` : ""}
+            ${bon.status === "rejected" && bon.rejection_reason ? `<div class="detail-reject-note">❌ Alasan Penolakan: ${escHtml(bon.rejection_reason)}</div>` : ""}
           </div>
         </td>
       `;
@@ -382,11 +384,15 @@ function renderLpj(bon) {
 function renderActions(bon) {
   const btns = [];
 
-  if (user.role === "ppk" && bon.status === "submitted")
+  if (user.role === "ppk" && bon.status === "submitted") {
     btns.push(`<button class="btn btn-sm btn-approve-ppk" onclick="updateStatus('${bon.id}','approved_ppk')">✓ Setujui (PPK)</button>`);
+    btns.push(`<button class="btn btn-sm btn-reject" onclick="rejectBon('${bon.id}','PPK')">✕ Tolak</button>`);
+  }
 
-  if (user.role === "kalapas" && bon.status === "approved_ppk")
+  if (user.role === "kalapas" && bon.status === "approved_ppk") {
     btns.push(`<button class="btn btn-sm btn-approve-kpl" onclick="updateStatus('${bon.id}','approved_kalapas')">✓ Setujui (Kalapas)</button>`);
+    btns.push(`<button class="btn btn-sm btn-reject" onclick="rejectBon('${bon.id}','Kalapas')">✕ Tolak</button>`);
+  }
 
   if (user.role === "bendahara" && bon.status === "approved_kalapas")
     btns.push(`<button class="btn btn-sm btn-disburse" onclick="updateStatus('${bon.id}','disbursed')">💰 Cairkan</button>`);
@@ -403,7 +409,17 @@ function renderActions(bon) {
 // ── Delete Bon ───────────────────────────────────────
 // Hapus items dulu baru header (foreign key constraint)
 async function deleteBon(id, name) {
-  if (!confirm(`Hapus bon milik "${name}"?\n\nData akan dihapus permanen.`)) return;
+  const result = await Swal.fire({
+    title: "Hapus Bon?",
+    html: `Bon milik <strong>${name}</strong> akan dihapus permanen.<br>Tindakan ini tidak dapat dibatalkan.`,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#e53e3e",
+    cancelButtonColor: "#718096",
+    confirmButtonText: "Ya, Hapus!",
+    cancelButtonText: "Batal",
+  });
+  if (!result.isConfirmed) return;
   try {
     // Hapus semua bon_items terkait dulu
     await fetch(`${SUPA_URL}/rest/v1/bon_items?bon_id=eq.${id}`, {
@@ -412,18 +428,74 @@ async function deleteBon(id, name) {
     });
     // Baru hapus bon-nya
     await sbDelete("bon", id);
+    await Swal.fire({ title: "Terhapus!", text: "Bon berhasil dihapus.", icon: "success", timer: 1800, showConfirmButton: false });
     loadBons();
-  } catch (err) { alert("Error: " + err.message); }
+  } catch (err) {
+    Swal.fire({ title: "Error", text: err.message, icon: "error" });
+  }
 }
 
 // ── Update Status ────────────────────────────────────
 async function updateStatus(id, status) {
-  if (!confirm(`Konfirmasi ubah status menjadi: "${statusLabel(status)}"?`)) return;
+  const result = await Swal.fire({
+    title: "Konfirmasi",
+    html: `Ubah status menjadi:<br><strong>"${statusLabel(status)}"</strong>?`,
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonColor: "#3182ce",
+    cancelButtonColor: "#718096",
+    confirmButtonText: "Ya, Konfirmasi",
+    cancelButtonText: "Batal",
+  });
+  if (!result.isConfirmed) return;
   try {
     await sbPatch("bon", id, { status });
+    await Swal.fire({ title: "Berhasil!", text: `Status diperbarui menjadi "${statusLabel(status)}".`, icon: "success", timer: 1800, showConfirmButton: false });
     loadBons();
-  } catch (err) { alert("Error: " + err.message); }
+  } catch (err) {
+    Swal.fire({ title: "Error", text: err.message, icon: "error" });
+  }
 }
+
+// ── Reject Bon ───────────────────────────────────────
+async function rejectBon(id, role) {
+  const result = await Swal.fire({
+    title: `Tolak Bon (${role})`,
+    html: `<label style="display:block;text-align:left;margin-bottom:6px;font-weight:600;color:#4a5568;">Alasan Penolakan <span style="color:#e53e3e;">*</span></label>
+           <textarea id="swal-reject-reason" class="swal2-textarea" placeholder="Tuliskan alasan penolakan..." style="margin:0;height:100px;resize:vertical;"></textarea>`,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#e53e3e",
+    cancelButtonColor: "#718096",
+    confirmButtonText: "Tolak Bon",
+    cancelButtonText: "Batal",
+    focusConfirm: false,
+    preConfirm: () => {
+      const reason = document.getElementById("swal-reject-reason").value.trim();
+      if (!reason) {
+        Swal.showValidationMessage("Alasan penolakan wajib diisi!");
+        return false;
+      }
+      return reason;
+    },
+  });
+  if (!result.isConfirmed) return;
+  try {
+    const API_BASE = "http://localhost:3000";
+    const res = await fetch(`${API_BASE}/bon/${id}/reject`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reason: result.value }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Gagal menolak bon.");
+    await Swal.fire({ title: "Bon Ditolak", text: "Bon telah berhasil ditolak.", icon: "success", timer: 1800, showConfirmButton: false });
+    loadBons();
+  } catch (err) {
+    Swal.fire({ title: "Error", text: err.message, icon: "error" });
+  }
+}
+
 
 // ── LPJ Modal ────────────────────────────────────────
 function openLpjModal(bonId) {
