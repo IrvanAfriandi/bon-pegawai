@@ -288,11 +288,33 @@ if (useTabView) {
       document.querySelectorAll(".bon-tab").forEach(t => t.classList.remove("active"));
       btn.classList.add("active");
       document.querySelectorAll(".bon-tab-panel").forEach(p => p.classList.add("hidden"));
-      const tabMap = { proses:"tabPanelProses", lpj:"tabPanelLpj", selesai:"tabPanelSelesai", ditolak:"tabPanelDitolak" };
+      const tabMap = {
+        proses:    "tabPanelProses",
+        pencairan: "tabPanelPencairan",
+        lpj:       "tabPanelLpj",
+        selesai:   "tabPanelSelesai",
+        ditolak:   "tabPanelDitolak",
+      };
       const panelId = tabMap[btn.dataset.tab];
       if (panelId) document.getElementById(panelId).classList.remove("hidden");
     });
   });
+
+  // ── Filter bar: search + bulan ───────────────────────
+  const tabSearchInput = document.getElementById("tabSearchInput");
+  const tabSearchClear = document.getElementById("tabSearchClear");
+  const tabMonthFilter = document.getElementById("tabMonthFilter");
+
+  tabSearchInput.addEventListener("input", () => {
+    tabSearchClear.classList.toggle("hidden", !tabSearchInput.value);
+    applyTabFilters();
+  });
+  tabSearchClear.addEventListener("click", () => {
+    tabSearchInput.value = "";
+    tabSearchClear.classList.add("hidden");
+    applyTabFilters();
+  });
+  tabMonthFilter.addEventListener("change", applyTabFilters);
 }
 
 async function loadBons() {
@@ -345,27 +367,81 @@ async function loadBons() {
   }
 }
 
+// ── Simpan semua bon terakhir untuk keperluan filter ──
+let _lastBons = [];
+
+// ── Isi dropdown bulan dari data bon ─────────────────
+function populateMonthFilter(bons) {
+  const monthSel = document.getElementById("tabMonthFilter");
+  if (!monthSel) return;
+  const months = new Set();
+  bons.forEach(b => {
+    const d = new Date(b.created_at);
+    months.add(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`);
+  });
+  const sorted = [...months].sort().reverse();
+  const prev = monthSel.value;
+  monthSel.innerHTML = `<option value="">Semua Bulan</option>`;
+  sorted.forEach(m => {
+    const [y, mo] = m.split("-");
+    const label = new Date(y, mo-1).toLocaleDateString("id-ID",{month:"long",year:"numeric"});
+    const opt = document.createElement("option");
+    opt.value = m;
+    opt.textContent = label;
+    if (m === prev) opt.selected = true;
+    monthSel.appendChild(opt);
+  });
+}
+
+// ── Terapkan filter search + bulan ke semua tab panel ─
+function applyTabFilters() {
+  const q     = (document.getElementById("tabSearchInput")?.value || "").trim().toLowerCase();
+  const month = document.getElementById("tabMonthFilter")?.value || "";
+
+  const filtered = _lastBons.filter(b => {
+    const matchQ = !q ||
+      (b.applicant_name || "").toLowerCase().includes(q) ||
+      (b.applicant_nip  || "").toLowerCase().includes(q);
+    const matchM = !month || (() => {
+      const d = new Date(b.created_at);
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}` === month;
+    })();
+    return matchQ && matchM;
+  });
+
+  _renderTabPanels(filtered);
+}
+
 // ── Render Tab View (pegawai & bendahara) ─────────────
 function renderTabView(bons) {
-  // Proses = sedang berjalan: submitted, approved_ppk, approved_kalapas, disbursed-tanpa-lpj
-  const prosesFinal = bons.filter(b =>
-    ["submitted","approved_ppk","approved_kalapas"].includes(b.status) ||
-    (b.status === "disbursed" && !b.lpj_file)
-  );
-  const lpjF    = bons.filter(b => b.status === "disbursed" && !b.lpj_file);
-  const selesaiF = bons.filter(b => b.status === "completed" || (b.status === "disbursed" && b.lpj_file));
-  const ditolakF = bons.filter(b => b.status === "rejected");
+  _lastBons = bons;
+  populateMonthFilter(bons);
+  _renderTabPanels(bons);
+}
+
+function _renderTabPanels(bons) {
+  // Proses = submitted dan approved_ppk saja
+  const prosesF    = bons.filter(b => ["submitted","approved_ppk"].includes(b.status));
+  // Menunggu Pencairan = sudah disetujui Kalapas
+  const pencairanF = bons.filter(b => b.status === "approved_kalapas");
+  // Harus Upload LPJ = sudah dicairkan, belum ada file LPJ
+  const lpjF       = bons.filter(b => b.status === "disbursed" && !b.lpj_file);
+  // Selesai = sudah LPJ atau disbursed+ada lpj
+  const selesaiF   = bons.filter(b => b.status === "completed" || (b.status === "disbursed" && b.lpj_file));
+  const ditolakF   = bons.filter(b => b.status === "rejected");
 
   // Update badge count
-  document.getElementById("tabCountProses").textContent  = prosesFinal.length;
-  document.getElementById("tabCountLpj").textContent     = lpjF.length;
-  document.getElementById("tabCountSelesai").textContent = selesaiF.length;
-  document.getElementById("tabCountDitolak").textContent = ditolakF.length;
+  document.getElementById("tabCountProses").textContent    = prosesF.length;
+  document.getElementById("tabCountPencairan").textContent = pencairanF.length;
+  document.getElementById("tabCountLpj").textContent       = lpjF.length;
+  document.getElementById("tabCountSelesai").textContent   = selesaiF.length;
+  document.getElementById("tabCountDitolak").textContent   = ditolakF.length;
 
-  renderTabPanel("tabPanelProses",  prosesFinal, "proses");
-  renderTabPanel("tabPanelLpj",     lpjF,        "lpj");
-  renderTabPanel("tabPanelSelesai", selesaiF,    "selesai");
-  renderTabPanel("tabPanelDitolak", ditolakF,    "ditolak");
+  renderTabPanel("tabPanelProses",    prosesF,    "proses");
+  renderTabPanel("tabPanelPencairan", pencairanF, "pencairan");
+  renderTabPanel("tabPanelLpj",       lpjF,       "lpj");
+  renderTabPanel("tabPanelSelesai",   selesaiF,   "selesai");
+  renderTabPanel("tabPanelDitolak",   ditolakF,   "ditolak");
 }
 
 function renderTabPanel(panelId, bons, tabType) {

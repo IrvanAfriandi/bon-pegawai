@@ -248,9 +248,34 @@
 
         <!-- Tab view: pegawai & bendahara -->
         <div id="tabView" class="hidden">
+
+          <!-- ── Filter Bar: Search + Sortir Bulan ── -->
+          <div class="tab-filter-bar">
+            <div class="tab-filter-search-wrap">
+              <span class="tab-filter-icon">🔍</span>
+              <input
+                type="text"
+                id="tabSearchInput"
+                class="tab-filter-search"
+                placeholder="Cari nama atau NIP pemohon..."
+                autocomplete="off"
+              />
+              <button class="tab-filter-clear hidden" id="tabSearchClear" title="Hapus pencarian">✕</button>
+            </div>
+            <div class="tab-filter-month-wrap">
+              <span class="tab-filter-icon">📅</span>
+              <select id="tabMonthFilter" class="tab-filter-select">
+                <option value="">Semua Bulan</option>
+              </select>
+            </div>
+          </div>
+
           <div class="bon-tabs-wrap">
             <button class="bon-tab active" data-tab="proses">
               Proses <span class="bon-tab-badge" id="tabCountProses">0</span>
+            </button>
+            <button class="bon-tab" data-tab="pencairan">
+              Menunggu Pencairan <span class="bon-tab-badge bon-tab-badge--amber" id="tabCountPencairan">0</span>
             </button>
             <button class="bon-tab" data-tab="lpj">
               Harus Upload LPJ <span class="bon-tab-badge bon-tab-badge--orange" id="tabCountLpj">0</span>
@@ -262,10 +287,11 @@
               Ditolak <span class="bon-tab-badge bon-tab-badge--red" id="tabCountDitolak">0</span>
             </button>
           </div>
-          <div id="tabPanelProses"  class="bon-tab-panel"></div>
-          <div id="tabPanelLpj"     class="bon-tab-panel hidden"></div>
-          <div id="tabPanelSelesai" class="bon-tab-panel hidden"></div>
-          <div id="tabPanelDitolak" class="bon-tab-panel hidden"></div>
+          <div id="tabPanelProses"    class="bon-tab-panel"></div>
+          <div id="tabPanelPencairan" class="bon-tab-panel hidden"></div>
+          <div id="tabPanelLpj"       class="bon-tab-panel hidden"></div>
+          <div id="tabPanelSelesai"   class="bon-tab-panel hidden"></div>
+          <div id="tabPanelDitolak"   class="bon-tab-panel hidden"></div>
         </div>
 
         <!-- Table view: ppk, kalapas, dan role lain -->

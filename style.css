@@ -1429,3 +1429,94 @@ select {
   color: var(--text-muted);
   font-size: 14px;
 }
+/* ── Tab Filter Bar (search + sortir bulan) ─────────── */
+.tab-filter-bar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 0 4px;
+  flex-wrap: wrap;
+}
+
+.tab-filter-search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0 10px;
+  gap: 6px;
+  transition: border-color .18s;
+}
+.tab-filter-search-wrap:focus-within {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(29,78,216,.1);
+}
+
+.tab-filter-icon {
+  font-size: 14px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+.tab-filter-search {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font);
+  font-size: 13px;
+  color: var(--text-primary);
+  padding: 9px 0;
+}
+.tab-filter-search::placeholder { color: var(--text-muted); }
+
+.tab-filter-clear {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 12px;
+  padding: 2px 4px;
+  border-radius: 50%;
+  line-height: 1;
+  transition: background .15s, color .15s;
+}
+.tab-filter-clear:hover { background: var(--red-mid); color: var(--red); }
+
+.tab-filter-month-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0 10px;
+  transition: border-color .18s;
+}
+.tab-filter-month-wrap:focus-within {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(29,78,216,.1);
+}
+
+.tab-filter-select {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font);
+  font-size: 13px;
+  color: var(--text-primary);
+  padding: 9px 0;
+  cursor: pointer;
+  min-width: 150px;
+}
+
+/* Badge amber untuk tab Menunggu Pencairan */
+.bon-tab-badge--amber {
+  background: var(--amber-mid);
+  color: var(--amber);
+}
