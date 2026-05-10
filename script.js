@@ -367,6 +367,33 @@ async function loadBons() {
       tbody.appendChild(tr);
       tbody.appendChild(trDetail);
     });
+
+    // ── Notifikasi otomatis untuk pegawai jika ada bon yang ditolak ──
+    if (user.role === "pegawai") {
+      const rejected = bons.filter(b => b.status === "rejected");
+      if (rejected.length > 0) {
+        const listHtml = rejected.map(b => `
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #fee2e2;gap:12px;">
+            <div style="text-align:left;">
+              <strong style="color:#1a202c;">${escHtml(b.applicant_name)}</strong>
+              <div style="font-size:11px;color:#718096;">${formatRupiah(b.total_amount)} · ${formatDate(b.created_at)}</div>
+              ${b.rejection_reason
+                ? `<div style="font-size:12px;color:#c53030;margin-top:3px;">📌 ${escHtml(b.rejection_reason)}</div>`
+                : `<div style="font-size:12px;color:#a0aec0;font-style:italic;">Alasan tidak dicatat</div>`}
+            </div>
+          </div>`).join("");
+        Swal.fire({
+          title: `❌ ${rejected.length} Bon Ditolak`,
+          html: `
+            <p style="color:#718096;font-size:13px;margin-bottom:12px;">Bon berikut telah ditolak. Silakan hubungi atasan untuk informasi lebih lanjut.</p>
+            <div style="max-height:220px;overflow-y:auto;">${listHtml}</div>`,
+          icon: "error",
+          confirmButtonColor: "#3182ce",
+          confirmButtonText: "Oke, Mengerti",
+        });
+      }
+    }
+
   } catch (err) {
     errorDiv.textContent = err.message;
     errorDiv.classList.remove("hidden");
@@ -399,6 +426,12 @@ function renderActions(bon) {
 
   if (user.role === "pegawai" && bon.status === "disbursed")
     btns.push(`<button class="btn btn-sm btn-lpj" onclick="openLpjModal('${bon.id}')">📄 Upload LPJ</button>`);
+
+  // Tombol lihat alasan penolakan — tampil untuk semua role jika ditolak
+  if (bon.status === "rejected") {
+    const safeReason = (bon.rejection_reason || "Tidak ada alasan yang dicatat.").replace(/'/g, "\\'").replace(/"/g, "&quot;");
+    btns.push(`<button class="btn btn-sm btn-show-reason" onclick="showRejectionReason('${safeReason}')">💬 Lihat Alasan</button>`);
+  }
 
   if (["ppk","kalapas","bendahara","admin"].includes(user.role))
     btns.push(`<button class="btn btn-sm btn-delete" onclick="deleteBon('${bon.id}',\`${escHtml(bon.applicant_name)}\`)">🗑 Hapus</button>`);
@@ -460,40 +493,115 @@ async function updateStatus(id, status) {
 // ── Reject Bon ───────────────────────────────────────
 async function rejectBon(id, role) {
   const result = await Swal.fire({
-    title: `Tolak Bon (${role})`,
-    html: `<label style="display:block;text-align:left;margin-bottom:6px;font-weight:600;color:#4a5568;">Alasan Penolakan <span style="color:#e53e3e;">*</span></label>
-           <textarea id="swal-reject-reason" class="swal2-textarea" placeholder="Tuliskan alasan penolakan..." style="margin:0;height:100px;resize:vertical;"></textarea>`,
+    title: `<span style="color:#e53e3e;">✕ Tolak Bon (${role})</span>`,
+    html: `
+      <p style="color:#718096;font-size:13px;margin-bottom:14px;">
+        Mohon isi alasan penolakan dengan jelas agar pemohon dapat memahami keputusan ini.
+      </p>
+      <label style="display:block;text-align:left;margin-bottom:6px;font-weight:600;color:#4a5568;font-size:13px;">
+        Alasan Penolakan <span style="color:#e53e3e;">*</span>
+      </label>
+      <textarea
+        id="swal-reject-reason"
+        class="swal2-textarea"
+        placeholder="Contoh: Dokumen pendukung tidak lengkap, anggaran tidak sesuai, dll."
+        style="margin:0;height:110px;resize:vertical;font-size:13px;border-color:#fed7d7;"
+      ></textarea>`,
     icon: "warning",
     showCancelButton: true,
     confirmButtonColor: "#e53e3e",
     cancelButtonColor: "#718096",
-    confirmButtonText: "Tolak Bon",
+    confirmButtonText: "✕ Tolak Bon",
     cancelButtonText: "Batal",
     focusConfirm: false,
+    customClass: { popup: "swal-reject-popup" },
+    didOpen: () => {
+      setTimeout(() => document.getElementById("swal-reject-reason")?.focus(), 100);
+    },
     preConfirm: () => {
       const reason = document.getElementById("swal-reject-reason").value.trim();
       if (!reason) {
-        Swal.showValidationMessage("Alasan penolakan wajib diisi!");
+        Swal.showValidationMessage("⚠️ Alasan penolakan wajib diisi!");
+        return false;
+      }
+      if (reason.length < 10) {
+        Swal.showValidationMessage("⚠️ Alasan terlalu singkat, minimal 10 karakter.");
         return false;
       }
       return reason;
     },
   });
   if (!result.isConfirmed) return;
+
+  // ── Step 1: Update status ke "rejected" dulu ──────────
   try {
-    const API_BASE = "http://localhost:3000";
-    const res = await fetch(`${API_BASE}/bon/${id}/reject`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ reason: result.value }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Gagal menolak bon.");
-    await Swal.fire({ title: "Bon Ditolak", text: "Bon telah berhasil ditolak.", icon: "success", timer: 1800, showConfirmButton: false });
-    loadBons();
+    await sbPatch("bon", id, { status: "rejected" });
   } catch (err) {
-    Swal.fire({ title: "Error", text: err.message, icon: "error" });
+    Swal.fire({
+      title: "Gagal Menolak",
+      html: `<p>Tidak dapat mengubah status bon.</p><code style="font-size:11px;color:#718096;">${escHtml(err.message)}</code>`,
+      icon: "error",
+      confirmButtonColor: "#e53e3e",
+    });
+    return;
   }
+
+  // ── Step 2: Coba simpan alasan penolakan ─────────────
+  let reasonSaved = false;
+  try {
+    await sbPatch("bon", id, { rejection_reason: result.value });
+    reasonSaved = true;
+  } catch (_) {
+    // Kolom rejection_reason belum ada di Supabase — abaikan
+    reasonSaved = false;
+  }
+
+  // ── Tampilkan hasil ───────────────────────────────────
+  if (reasonSaved) {
+    await Swal.fire({
+      title: "✅ Bon Berhasil Ditolak",
+      html: `
+        <p style="color:#4a5568;margin-bottom:12px;">Alasan penolakan telah disimpan:</p>
+        <div style="background:#fff1f2;border-left:4px solid #e53e3e;padding:12px 16px;border-radius:8px;text-align:left;color:#c53030;font-size:13px;line-height:1.6;">
+          "${escHtml(result.value)}"
+        </div>`,
+      icon: "success",
+      confirmButtonColor: "#3182ce",
+      confirmButtonText: "Tutup",
+    });
+  } else {
+    await Swal.fire({
+      title: "⚠️ Bon Ditolak (Alasan Belum Tersimpan)",
+      html: `
+        <p style="color:#4a5568;margin-bottom:10px;">Status berhasil diubah ke <strong>Ditolak</strong>, namun alasan tidak tersimpan karena kolom <code>rejection_reason</code> belum ada di Supabase.</p>
+        <div style="background:#fff1f2;border-left:4px solid #e53e3e;padding:10px 14px;border-radius:8px;text-align:left;color:#c53030;font-size:13px;margin-bottom:12px;">
+          Alasan: "${escHtml(result.value)}"
+        </div>
+        <p style="font-size:12px;color:#718096;background:#f7fafc;padding:10px;border-radius:6px;text-align:left;">
+          ⚙️ Jalankan SQL ini di <strong>Supabase → SQL Editor</strong>:<br>
+          <code style="font-size:11px;">ALTER TABLE bon ADD COLUMN rejection_reason TEXT DEFAULT '';</code>
+        </p>`,
+      icon: "warning",
+      confirmButtonColor: "#3182ce",
+      confirmButtonText: "Mengerti",
+    });
+  }
+
+  loadBons();
+}
+
+// ── Lihat Alasan Penolakan ────────────────────────────
+function showRejectionReason(reason) {
+  const isNoReason = !reason || reason === "Tidak ada alasan yang dicatat.";
+  Swal.fire({
+    title: "❌ Bon Ditolak",
+    html: isNoReason
+      ? `<p style="color:#718096;font-style:italic;">Tidak ada alasan penolakan yang dicatat.</p>`
+      : `<div style="background:#fff1f2;border-left:4px solid #e53e3e;padding:14px 16px;border-radius:8px;text-align:left;color:#c53030;font-size:14px;line-height:1.7;word-break:break-word;">${escHtml(reason)}</div>`,
+    icon: "error",
+    confirmButtonColor: "#3182ce",
+    confirmButtonText: "Tutup",
+  });
 }
 
 
