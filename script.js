@@ -284,11 +284,13 @@ async function loadBons() {
   errorDiv.classList.add("hidden");
 
   try {
+    // Bangun query filter berdasarkan role
+    let query = "select=*,bon_items(id,name,amount,purpose)&order=created_at.desc";
+    if (user.role === "ppk")     query += "&status=eq.submitted";
+    if (user.role === "kalapas") query += "&status=eq.approved_ppk";
+
     // Ambil bon beserta items-nya sekaligus (PostgREST resource embedding)
-    const bons = await sbGet(
-      "bon",
-      "select=*,bon_items(id,name,amount,purpose)&order=created_at.desc"
-    );
+    const bons = await sbGet("bon", query);
 
     if (!bons.length) {
       tbody.innerHTML = `<tr><td colspan="7" class="loading-row">Belum ada pengajuan bon.</td></tr>`;
@@ -433,7 +435,7 @@ function renderActions(bon) {
     btns.push(`<button class="btn btn-sm btn-show-reason" onclick="showRejectionReason('${safeReason}')">💬 Lihat Alasan</button>`);
   }
 
-  if (["ppk","kalapas","bendahara","admin"].includes(user.role))
+  if (["bendahara","admin"].includes(user.role))
     btns.push(`<button class="btn btn-sm btn-delete" onclick="deleteBon('${bon.id}',\`${escHtml(bon.applicant_name)}\`)">🗑 Hapus</button>`);
 
   return btns.join("") || `<span style="color:var(--text-muted);font-size:12px;">–</span>`;
