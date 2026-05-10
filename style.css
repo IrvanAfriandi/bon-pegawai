@@ -1290,3 +1290,142 @@ select {
   text-transform: uppercase;
   letter-spacing: .4px;
 }
+
+/* ══════════════════════════════════════════════════════
+   BON TABS (pegawai & bendahara view)
+══════════════════════════════════════════════════════ */
+.bon-tabs-wrap {
+  display: flex;
+  gap: 4px;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 20px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.bon-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  margin-bottom: -2px;
+  transition: color .15s, border-color .15s;
+}
+.bon-tab:hover  { color: var(--text-primary); }
+.bon-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+.bon-tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+  transition: background .15s, color .15s;
+}
+.bon-tab.active .bon-tab-badge         { background: #dbeafe; color: var(--blue); }
+.bon-tab-badge--orange                 { }
+.bon-tab.active .bon-tab-badge--orange { background: #ffedd5; color: #c2410c; }
+.bon-tab-badge--green                  { }
+.bon-tab.active .bon-tab-badge--green  { background: #dcfce7; color: #15803d; }
+.bon-tab-badge--red                    { }
+.bon-tab.active .bon-tab-badge--red    { background: #fee2e2; color: #b91c1c; }
+
+.bon-tab-panel { }
+
+/* Card list dalam tab panel */
+.bon-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bon-card {
+  background: var(--bg-primary);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 18px;
+  cursor: pointer;
+  transition: box-shadow .15s, border-color .15s;
+}
+.bon-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,.07); border-color: var(--blue); }
+.bon-card.expanded { border-color: var(--blue); }
+
+.bon-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.bon-card-left   { display: flex; flex-direction: column; gap: 2px; }
+.bon-card-name   { font-weight: 700; font-size: 14px; color: var(--text-primary); }
+.bon-card-nip    { font-size: 11px; color: var(--text-muted); }
+.bon-card-right  { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.bon-card-amount { font-family: var(--font-mono); font-weight: 700; font-size: 14px; color: var(--blue); }
+.bon-card-chevron { font-size: 11px; color: var(--text-muted); transition: transform .2s; }
+.bon-card.expanded .bon-card-chevron { transform: rotate(90deg); }
+
+.bon-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.bon-card-detail {
+  margin-top: 14px;
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+  display: none;
+}
+.bon-card.expanded .bon-card-detail { display: block; }
+
+.bon-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.bon-card-reject-note {
+  background: #fff1f2;
+  border-left: 4px solid var(--red);
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: #c53030;
+  margin-top: 10px;
+  line-height: 1.6;
+}
+.bon-card-lpj-note {
+  background: #f0fdf4;
+  border-left: 4px solid #22c55e;
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: #15803d;
+  margin-top: 10px;
+  line-height: 1.6;
+}
+
+.bon-tab-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+  font-size: 14px;
+}

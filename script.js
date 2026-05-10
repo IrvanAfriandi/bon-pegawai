@@ -273,14 +273,30 @@ document.getElementById("submitBonBtn").addEventListener("click", async () => {
 });
 
 // ═══════════════════════════════════════════════════
-//  LOAD & RENDER BON TABLE
+//  LOAD & RENDER BON TABLE / TAB VIEW
 // ═══════════════════════════════════════════════════
-// Supabase PostgREST: join bon_items via foreign key dengan select embed
+
+// Inisialisasi tampilan: tab atau tabel berdasarkan role
+const useTabView = ["pegawai", "bendahara"].includes(user.role);
+if (useTabView) {
+  document.getElementById("tabView").classList.remove("hidden");
+  document.getElementById("tableView").classList.add("hidden");
+
+  // Logika klik tab
+  document.querySelectorAll(".bon-tab").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".bon-tab").forEach(t => t.classList.remove("active"));
+      btn.classList.add("active");
+      document.querySelectorAll(".bon-tab-panel").forEach(p => p.classList.add("hidden"));
+      const tabMap = { proses:"tabPanelProses", lpj:"tabPanelLpj", selesai:"tabPanelSelesai", ditolak:"tabPanelDitolak" };
+      const panelId = tabMap[btn.dataset.tab];
+      if (panelId) document.getElementById(panelId).classList.remove("hidden");
+    });
+  });
+}
 
 async function loadBons() {
-  const tbody    = document.getElementById("bonTableBody");
   const errorDiv = document.getElementById("tableError");
-  tbody.innerHTML = `<tr><td colspan="7" class="loading-row">Memuat data...</td></tr>`;
   errorDiv.classList.add("hidden");
 
   try {
@@ -289,88 +305,15 @@ async function loadBons() {
     if (user.role === "ppk")     query += "&status=eq.submitted";
     if (user.role === "kalapas") query += "&status=eq.approved_ppk";
 
-    // Ambil bon beserta items-nya sekaligus (PostgREST resource embedding)
     const bons = await sbGet("bon", query);
 
-    if (!bons.length) {
-      tbody.innerHTML = `<tr><td colspan="7" class="loading-row">Belum ada pengajuan bon.</td></tr>`;
-      return;
+    if (useTabView) {
+      renderTabView(bons);
+    } else {
+      renderTableView(bons);
     }
 
-    tbody.innerHTML = "";
-    bons.forEach((bon, index) => {
-      const items = bon.bon_items || [];
-
-      const tr = document.createElement("tr");
-      tr.className = "bon-row";
-      tr.innerHTML = `
-        <td>
-          <span class="row-chevron" id="icon-${bon.id}" style="display:inline-block;transition:transform .2s;">▶</span>
-          ${index + 1}
-        </td>
-        <td>
-          <strong>${escHtml(bon.applicant_name)}</strong>
-          ${bon.applicant_nip ? `<br><small style="color:var(--text-muted);font-size:11px;">NIP: ${escHtml(bon.applicant_nip)}</small>` : ""}
-        </td>
-        <td style="font-family:var(--font-mono);font-weight:500;">${formatRupiah(bon.total_amount)}</td>
-        <td><span class="badge badge-${bon.status}">${statusLabel(bon.status)}</span></td>
-        <td>${renderLpj(bon)}</td>
-        <td>${formatDate(bon.created_at)}</td>
-        <td class="actions-cell">${renderActions(bon)}</td>
-      `;
-
-      // Detail row — tampilkan bon_items
-      const trDetail = document.createElement("tr");
-      trDetail.className = "bon-detail-row hidden";
-      trDetail.innerHTML = `
-        <td colspan="7">
-          <div class="detail-panel">
-            <table class="detail-items-table">
-              <thead>
-                <tr><th>#</th><th>Nama Item</th><th>Keperluan</th><th style="text-align:right;">Jumlah</th></tr>
-              </thead>
-              <tbody>
-                ${items.length ? items.map((item, idx) => `
-                  <tr>
-                    <td>${idx + 1}</td>
-                    <td>${escHtml(item.name)}</td>
-                    <td>${escHtml(item.purpose)}</td>
-                    <td style="text-align:right;font-family:var(--font-mono);font-weight:500;">${formatRupiah(item.amount)}</td>
-                  </tr>
-                `).join("") : `<tr><td colspan="4" style="text-align:center;color:var(--text-muted);">Tidak ada item</td></tr>`}
-              </tbody>
-              <tfoot>
-                <tr>
-                  <td colspan="3" style="text-align:right;font-weight:600;color:var(--text-secondary);">TOTAL</td>
-                  <td style="text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--blue);">${formatRupiah(bon.total_amount)}</td>
-                </tr>
-              </tfoot>
-            </table>
-            ${bon.lpj_description ? `<div class="detail-lpj-note">📝 Keterangan LPJ: ${escHtml(bon.lpj_description)}</div>` : ""}
-            ${bon.status === "rejected" && bon.rejection_reason ? `<div class="detail-reject-note">❌ Alasan Penolakan: ${escHtml(bon.rejection_reason)}</div>` : ""}
-          </div>
-        </td>
-      `;
-
-      // Toggle detail row
-      tr.addEventListener("click", (e) => {
-        if (e.target.closest("button") || e.target.closest("a")) return;
-        const isOpen = !trDetail.classList.contains("hidden");
-        const icon   = document.getElementById(`icon-${bon.id}`);
-        if (isOpen) {
-          trDetail.classList.add("hidden");
-          if (icon) icon.style.transform = "rotate(0deg)";
-        } else {
-          trDetail.classList.remove("hidden");
-          if (icon) icon.style.transform = "rotate(90deg)";
-        }
-      });
-
-      tbody.appendChild(tr);
-      tbody.appendChild(trDetail);
-    });
-
-    // ── Notifikasi otomatis untuk pegawai jika ada bon yang ditolak ──
+    // Notifikasi ditolak untuk pegawai
     if (user.role === "pegawai") {
       const rejected = bons.filter(b => b.status === "rejected");
       if (rejected.length > 0) {
@@ -399,8 +342,175 @@ async function loadBons() {
   } catch (err) {
     errorDiv.textContent = err.message;
     errorDiv.classList.remove("hidden");
-    tbody.innerHTML = `<tr><td colspan="7" class="loading-row">Gagal memuat data.</td></tr>`;
   }
+}
+
+// ── Render Tab View (pegawai & bendahara) ─────────────
+function renderTabView(bons) {
+  // Proses = sedang berjalan: submitted, approved_ppk, approved_kalapas, disbursed-tanpa-lpj
+  const prosesFinal = bons.filter(b =>
+    ["submitted","approved_ppk","approved_kalapas"].includes(b.status) ||
+    (b.status === "disbursed" && !b.lpj_file)
+  );
+  const lpjF    = bons.filter(b => b.status === "disbursed" && !b.lpj_file);
+  const selesaiF = bons.filter(b => b.status === "completed" || (b.status === "disbursed" && b.lpj_file));
+  const ditolakF = bons.filter(b => b.status === "rejected");
+
+  // Update badge count
+  document.getElementById("tabCountProses").textContent  = prosesFinal.length;
+  document.getElementById("tabCountLpj").textContent     = lpjF.length;
+  document.getElementById("tabCountSelesai").textContent = selesaiF.length;
+  document.getElementById("tabCountDitolak").textContent = ditolakF.length;
+
+  renderTabPanel("tabPanelProses",  prosesFinal, "proses");
+  renderTabPanel("tabPanelLpj",     lpjF,        "lpj");
+  renderTabPanel("tabPanelSelesai", selesaiF,    "selesai");
+  renderTabPanel("tabPanelDitolak", ditolakF,    "ditolak");
+}
+
+function renderTabPanel(panelId, bons, tabType) {
+  const panel = document.getElementById(panelId);
+  if (!bons.length) {
+    panel.innerHTML = `<div class="bon-tab-empty">✅ Tidak ada pengajuan di kategori ini.</div>`;
+    return;
+  }
+  panel.innerHTML = `<div class="bon-card-list">${bons.map((bon, idx) => buildBonCard(bon, idx, tabType)).join("")}</div>`;
+
+  // Pasang event toggle expand
+  panel.querySelectorAll(".bon-card").forEach(card => {
+    card.addEventListener("click", (e) => {
+      if (e.target.closest("button") || e.target.closest("a")) return;
+      card.classList.toggle("expanded");
+    });
+  });
+}
+
+function buildBonCard(bon, idx, tabType) {
+  const items = bon.bon_items || [];
+  const itemsHtml = items.length
+    ? `<table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:8px;">
+        <thead><tr style="color:var(--text-muted);">
+          <th style="text-align:left;padding:4px 8px 4px 0;font-weight:600;">#</th>
+          <th style="text-align:left;padding:4px 8px 4px 0;font-weight:600;">Nama Item</th>
+          <th style="text-align:left;padding:4px 8px 4px 0;font-weight:600;">Keperluan</th>
+          <th style="text-align:right;padding:4px 0;font-weight:600;">Jumlah</th>
+        </tr></thead>
+        <tbody>
+          ${items.map((item, i) => `
+            <tr style="border-top:1px solid var(--border);">
+              <td style="padding:6px 8px 6px 0;color:var(--text-muted);">${i+1}</td>
+              <td style="padding:6px 8px 6px 0;">${escHtml(item.name)}</td>
+              <td style="padding:6px 8px 6px 0;color:var(--text-secondary);">${escHtml(item.purpose)}</td>
+              <td style="padding:6px 0;text-align:right;font-family:var(--font-mono);font-weight:500;">${formatRupiah(item.amount)}</td>
+            </tr>`).join("")}
+        </tbody>
+        <tfoot><tr style="border-top:2px solid var(--border);">
+          <td colspan="3" style="padding:6px 0;text-align:right;font-weight:700;color:var(--text-secondary);font-size:12px;">TOTAL</td>
+          <td style="padding:6px 0;text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--blue);">${formatRupiah(bon.total_amount)}</td>
+        </tr></tfoot>
+      </table>`
+    : `<p style="font-size:12px;color:var(--text-muted);margin:0;">Tidak ada item.</p>`;
+
+  const extraNote = bon.status === "rejected" && bon.rejection_reason
+    ? `<div class="bon-card-reject-note">❌ Alasan Penolakan: ${escHtml(bon.rejection_reason)}</div>`
+    : bon.lpj_description
+      ? `<div class="bon-card-lpj-note">📝 Keterangan LPJ: ${escHtml(bon.lpj_description)}</div>`
+      : "";
+
+  const actionsHtml = renderActions(bon);
+  const hasActions = actionsHtml && !actionsHtml.includes("color:var(--text-muted)");
+
+  return `
+    <div class="bon-card" data-id="${bon.id}">
+      <div class="bon-card-top">
+        <div class="bon-card-left">
+          <span class="bon-card-name">${escHtml(bon.applicant_name)}</span>
+          ${bon.applicant_nip ? `<span class="bon-card-nip">NIP: ${escHtml(bon.applicant_nip)}</span>` : ""}
+        </div>
+        <div class="bon-card-right">
+          <span class="bon-card-amount">${formatRupiah(bon.total_amount)}</span>
+          <span class="badge badge-${bon.status}">${statusLabel(bon.status)}</span>
+          <span class="bon-card-chevron">▶</span>
+        </div>
+      </div>
+      <div class="bon-card-meta">
+        <span>📅 ${formatDate(bon.created_at)}</span>
+        <span>📦 ${(bon.bon_items||[]).length} item</span>
+        ${bon.lpj_file ? `<a href="${sbFileUrl('lpj-files', bon.lpj_file)}" target="_blank" class="lpj-link" onclick="event.stopPropagation()">📄 Lihat LPJ</a>` : ""}
+      </div>
+      <div class="bon-card-detail">
+        ${itemsHtml}
+        ${extraNote}
+        ${hasActions ? `<div class="bon-card-actions">${actionsHtml}</div>` : ""}
+      </div>
+    </div>`;
+}
+
+// ── Render Table View (ppk, kalapas, dll) ─────────────
+function renderTableView(bons) {
+  const tbody = document.getElementById("bonTableBody");
+  if (!bons.length) {
+    tbody.innerHTML = `<tr><td colspan="7" class="loading-row">Belum ada pengajuan bon.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = "";
+  bons.forEach((bon, index) => {
+    const items = bon.bon_items || [];
+    const tr = document.createElement("tr");
+    tr.className = "bon-row";
+    tr.innerHTML = `
+      <td>
+        <span class="row-chevron" id="icon-${bon.id}" style="display:inline-block;transition:transform .2s;">▶</span>
+        ${index + 1}
+      </td>
+      <td>
+        <strong>${escHtml(bon.applicant_name)}</strong>
+        ${bon.applicant_nip ? `<br><small style="color:var(--text-muted);font-size:11px;">NIP: ${escHtml(bon.applicant_nip)}</small>` : ""}
+      </td>
+      <td style="font-family:var(--font-mono);font-weight:500;">${formatRupiah(bon.total_amount)}</td>
+      <td><span class="badge badge-${bon.status}">${statusLabel(bon.status)}</span></td>
+      <td>${renderLpj(bon)}</td>
+      <td>${formatDate(bon.created_at)}</td>
+      <td class="actions-cell">${renderActions(bon)}</td>
+    `;
+    const trDetail = document.createElement("tr");
+    trDetail.className = "bon-detail-row hidden";
+    trDetail.innerHTML = `
+      <td colspan="7">
+        <div class="detail-panel">
+          <table class="detail-items-table">
+            <thead><tr><th>#</th><th>Nama Item</th><th>Keperluan</th><th style="text-align:right;">Jumlah</th></tr></thead>
+            <tbody>
+              ${items.length ? items.map((item, idx) => `
+                <tr>
+                  <td>${idx + 1}</td>
+                  <td>${escHtml(item.name)}</td>
+                  <td>${escHtml(item.purpose)}</td>
+                  <td style="text-align:right;font-family:var(--font-mono);font-weight:500;">${formatRupiah(item.amount)}</td>
+                </tr>`).join("") : `<tr><td colspan="4" style="text-align:center;color:var(--text-muted);">Tidak ada item</td></tr>`}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="3" style="text-align:right;font-weight:600;color:var(--text-secondary);">TOTAL</td>
+                <td style="text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--blue);">${formatRupiah(bon.total_amount)}</td>
+              </tr>
+            </tfoot>
+          </table>
+          ${bon.lpj_description ? `<div class="detail-lpj-note">📝 Keterangan LPJ: ${escHtml(bon.lpj_description)}</div>` : ""}
+          ${bon.status === "rejected" && bon.rejection_reason ? `<div class="detail-reject-note">❌ Alasan Penolakan: ${escHtml(bon.rejection_reason)}</div>` : ""}
+        </div>
+      </td>
+    `;
+    tr.addEventListener("click", (e) => {
+      if (e.target.closest("button") || e.target.closest("a")) return;
+      const isOpen = !trDetail.classList.contains("hidden");
+      const icon   = document.getElementById(`icon-${bon.id}`);
+      if (isOpen) { trDetail.classList.add("hidden"); if (icon) icon.style.transform = "rotate(0deg)"; }
+      else         { trDetail.classList.remove("hidden"); if (icon) icon.style.transform = "rotate(90deg)"; }
+    });
+    tbody.appendChild(tr);
+    tbody.appendChild(trDetail);
+  });
 }
 
 function renderLpj(bon) {
@@ -892,132 +1002,3 @@ document.getElementById("submitEditBonBtn").addEventListener("click", async () =
 // ── Refresh & Init ────────────────────────────────────
 document.getElementById("refreshBtn").addEventListener("click", loadBons);
 loadBons();
-
-// ═══════════════════════════════════════════════════
-//  DASHBOARD BENDAHARA
-// ═══════════════════════════════════════════════════
-
-if (user.role === "bendahara") {
-  const dashSection = document.getElementById("dashboardSection");
-  dashSection.classList.remove("hidden");
-
-  let allBons = [];
-  let activeFilter = "all";
-
-  const filterLabels = {
-    all:             "Semua Pengajuan",
-    submitted:       "Menunggu Persetujuan PPK",
-    approved_ppk:    "Menunggu Persetujuan Kalapas",
-    approved_kalapas:"Menunggu Pencairan Dana",
-    disbursed_nolpj: "Belum Upload LPJ",
-    completed:       "Sudah Upload LPJ",
-    rejected:        "Ditolak",
-  };
-
-  async function loadDashboard() {
-    document.getElementById("dashListBody").innerHTML =
-      `<div class="dash-list-loading">Memuat data...</div>`;
-
-    try {
-      allBons = await sbGet("bon", "select=*,bon_items(id,name,amount,purpose)&order=created_at.desc");
-      updateCounts();
-      renderList(activeFilter);
-    } catch (err) {
-      document.getElementById("dashListBody").innerHTML =
-        `<div class="dash-list-loading" style="color:var(--red);">Gagal memuat: ${err.message}</div>`;
-    }
-  }
-
-  function filterBons(filter) {
-    switch (filter) {
-      case "submitted":        return allBons.filter(b => b.status === "submitted");
-      case "approved_ppk":     return allBons.filter(b => b.status === "approved_ppk");
-      case "approved_kalapas": return allBons.filter(b => b.status === "approved_kalapas");
-      case "disbursed_nolpj":  return allBons.filter(b => b.status === "disbursed" && !b.lpj_file);
-      case "completed":        return allBons.filter(b => b.status === "completed");
-      case "rejected":         return allBons.filter(b => b.status === "rejected");
-      default:                 return allBons;
-    }
-  }
-
-  function updateCounts() {
-    document.getElementById("countSubmitted").textContent        = allBons.filter(b => b.status === "submitted").length;
-    document.getElementById("countApprovedPpk").textContent      = allBons.filter(b => b.status === "approved_ppk").length;
-    document.getElementById("countApprovedKalapas").textContent  = allBons.filter(b => b.status === "approved_kalapas").length;
-    document.getElementById("countNolpj").textContent            = allBons.filter(b => b.status === "disbursed" && !b.lpj_file).length;
-    document.getElementById("countCompleted").textContent        = allBons.filter(b => b.status === "completed").length;
-    document.getElementById("countRejected").textContent         = allBons.filter(b => b.status === "rejected").length;
-  }
-
-  function renderList(filter) {
-    activeFilter = filter;
-    const list = filterBons(filter);
-    const body = document.getElementById("dashListBody");
-    document.getElementById("dashListTitle").textContent = filterLabels[filter] || "Semua Pengajuan";
-    document.getElementById("dashListCount").textContent = list.length + " pengajuan";
-
-    if (!list.length) {
-      body.innerHTML = `<div class="dash-list-loading">Tidak ada data untuk kategori ini.</div>`;
-      return;
-    }
-
-    body.innerHTML = list.map(bon => `
-      <div class="dash-list-item">
-        <div class="dash-list-meta">
-          <span class="dash-list-name">${escHtml(bon.applicant_name)}</span>
-          ${bon.applicant_nip ? `<span class="dash-list-nip">NIP: ${escHtml(bon.applicant_nip)}</span>` : ""}
-          <span class="dash-list-date">${formatDate(bon.created_at)}</span>
-        </div>
-        <div class="dash-list-right">
-          <span class="dash-list-amount">${formatRupiah(bon.total_amount)}</span>
-          <span class="badge badge-${bon.status}">${statusLabel(bon.status)}</span>
-        </div>
-      </div>
-    `).join("");
-  }
-
-  // Tab click
-  document.querySelectorAll(".dash-tab").forEach(btn => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll(".dash-tab").forEach(t => t.classList.remove("active"));
-      btn.classList.add("active");
-      // Sync stat card active state
-      const filterMap = {
-        submitted:        "statSubmitted",
-        approved_ppk:     "statApprovedPpk",
-        approved_kalapas: "statApprovedKalapas",
-        disbursed_nolpj:  "statNolpj",
-        completed:        "statCompleted",
-        rejected:         "statRejected",
-      };
-      document.querySelectorAll(".dash-card").forEach(c => c.classList.remove("active"));
-      const cardId = filterMap[btn.dataset.filter];
-      if (cardId) document.getElementById(cardId)?.classList.add("active");
-      renderList(btn.dataset.filter);
-    });
-  });
-
-  // Stat card click → filter
-  const cardFilterMap = {
-    statSubmitted:        "submitted",
-    statApprovedPpk:      "approved_ppk",
-    statApprovedKalapas:  "approved_kalapas",
-    statNolpj:            "disbursed_nolpj",
-    statCompleted:        "completed",
-    statRejected:         "rejected",
-  };
-  Object.entries(cardFilterMap).forEach(([cardId, filter]) => {
-    document.getElementById(cardId)?.addEventListener("click", () => {
-      // Sync tab
-      document.querySelectorAll(".dash-tab").forEach(t => {
-        t.classList.toggle("active", t.dataset.filter === filter);
-      });
-      document.querySelectorAll(".dash-card").forEach(c => c.classList.remove("active"));
-      document.getElementById(cardId).classList.add("active");
-      renderList(filter);
-    });
-  });
-
-  document.getElementById("refreshDashboardBtn").addEventListener("click", loadDashboard);
-  loadDashboard();
-}

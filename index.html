@@ -245,23 +245,49 @@
       </div>
       <div class="card-body">
         <div id="tableError" class="error-msg hidden"></div>
-        <div class="table-wrapper">
-          <table class="bon-table" id="bonTable">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Nama Pemohon</th>
-                <th>Total</th>
-                <th>Status</th>
-                <th>LPJ</th>
-                <th>Tanggal</th>
-                <th>Aksi</th>
-              </tr>
-            </thead>
-            <tbody id="bonTableBody">
-              <tr><td colspan="7" class="loading-row">Memuat data...</td></tr>
-            </tbody>
-          </table>
+
+        <!-- Tab view: pegawai & bendahara -->
+        <div id="tabView" class="hidden">
+          <div class="bon-tabs-wrap">
+            <button class="bon-tab active" data-tab="proses">
+              Proses <span class="bon-tab-badge" id="tabCountProses">0</span>
+            </button>
+            <button class="bon-tab" data-tab="lpj">
+              Harus Upload LPJ <span class="bon-tab-badge bon-tab-badge--orange" id="tabCountLpj">0</span>
+            </button>
+            <button class="bon-tab" data-tab="selesai">
+              Selesai <span class="bon-tab-badge bon-tab-badge--green" id="tabCountSelesai">0</span>
+            </button>
+            <button class="bon-tab" data-tab="ditolak">
+              Ditolak <span class="bon-tab-badge bon-tab-badge--red" id="tabCountDitolak">0</span>
+            </button>
+          </div>
+          <div id="tabPanelProses"  class="bon-tab-panel"></div>
+          <div id="tabPanelLpj"     class="bon-tab-panel hidden"></div>
+          <div id="tabPanelSelesai" class="bon-tab-panel hidden"></div>
+          <div id="tabPanelDitolak" class="bon-tab-panel hidden"></div>
+        </div>
+
+        <!-- Table view: ppk, kalapas, dan role lain -->
+        <div id="tableView">
+          <div class="table-wrapper">
+            <table class="bon-table" id="bonTable">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Nama Pemohon</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>LPJ</th>
+                  <th>Tanggal</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="bonTableBody">
+                <tr><td colspan="7" class="loading-row">Memuat data...</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </section>
