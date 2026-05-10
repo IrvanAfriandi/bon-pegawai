@@ -1266,3 +1266,27 @@ select {
   .login-form   { padding: 22px 24px; }
   .login-footer { padding: 12px 24px 16px; }
 }
+/* ══════════════════════════════════════════════════════
+   EDIT BON MODAL – rejection info box
+══════════════════════════════════════════════════════ */
+.rejection-info-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: #fff1f2;
+  border-left: 4px solid var(--red);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 18px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #c53030;
+  word-break: break-word;
+}
+.rejection-info-label {
+  font-weight: 700;
+  color: #9b2c2c;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+}

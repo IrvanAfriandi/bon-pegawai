@@ -113,6 +113,51 @@
       </div>
     </div>
 
+    <!-- ── Edit Bon Modal (pegawai – bon ditolak) ── -->
+    <div class="modal-overlay hidden" id="editBonModal">
+      <div class="modal" style="max-width:620px;">
+        <div class="modal-header">
+          <h3>✏️ Edit & Ajukan Ulang Bon</h3>
+          <button class="modal-close" id="closeEditBonModal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="editBonId" />
+
+          <!-- Info alasan penolakan -->
+          <div id="editRejectionInfo" class="rejection-info-box hidden">
+            <span class="rejection-info-label">❌ Alasan Penolakan:</span>
+            <span id="editRejectionReason"></span>
+          </div>
+
+          <!-- Nama pemohon (readonly, tidak bisa diganti) -->
+          <div class="form-group">
+            <label>Nama Pemohon</label>
+            <input type="text" id="editApplicantName" class="combobox-input" readonly style="background:var(--bg-secondary);cursor:not-allowed;opacity:.7;" />
+            <input type="hidden" id="editApplicantNip" />
+          </div>
+
+          <!-- Rincian item -->
+          <div class="items-section">
+            <div class="items-header">
+              <label>Rincian Item</label>
+              <button class="btn btn-sm btn-secondary" id="editAddItemBtn">+ Tambah Item</button>
+            </div>
+            <div id="editItemsContainer"></div>
+          </div>
+
+          <div class="total-row">
+            <span>Total:</span>
+            <span id="editTotalDisplay" class="total-amount">Rp 0</span>
+          </div>
+
+          <div id="editBonError"   class="error-msg hidden"></div>
+          <div id="editBonSuccess" class="success-msg hidden"></div>
+
+          <button class="btn btn-primary btn-full" id="submitEditBonBtn">🔄 Ajukan Ulang</button>
+        </div>
+      </div>
+    </div>
+
     <!-- ── Dashboard Bendahara ── -->
     <section class="card hidden" id="dashboardSection">
       <div class="card-header">

@@ -433,6 +433,9 @@ function renderActions(bon) {
   if (bon.status === "rejected") {
     const safeReason = (bon.rejection_reason || "Tidak ada alasan yang dicatat.").replace(/'/g, "\\'").replace(/"/g, "&quot;");
     btns.push(`<button class="btn btn-sm btn-show-reason" onclick="showRejectionReason('${safeReason}')">💬 Lihat Alasan</button>`);
+    // Tombol edit & ajukan ulang — hanya untuk pegawai
+    if (user.role === "pegawai")
+      btns.push(`<button class="btn btn-sm btn-lpj" onclick="openEditBonModal('${bon.id}')">✏️ Edit & Ajukan Ulang</button>`);
   }
 
   if (["bendahara","admin"].includes(user.role))
@@ -701,6 +704,190 @@ document.getElementById("submitLpjBtn").addEventListener("click", async () => {
   }
 });
 
+
+// ═══════════════════════════════════════════════════
+//  EDIT & AJUKAN ULANG BON (pegawai – bon ditolak)
+// ═══════════════════════════════════════════════════
+
+let editItemCount = 0;
+
+function addEditItem(name = "", amount = "", purpose = "") {
+  editItemCount++;
+  const idx = editItemCount;
+  const container = document.getElementById("editItemsContainer");
+  const row = document.createElement("div");
+  row.className = "item-row";
+  row.dataset.idx = idx;
+  row.innerHTML = `
+    <input type="text"   placeholder="Nama item"    class="edit-item-name"    data-idx="${idx}" value="${escHtml(String(name))}" />
+    <input type="number" placeholder="Jumlah (Rp)"  class="edit-item-amount"  data-idx="${idx}" min="1" value="${amount}" />
+    <input type="text"   placeholder="Keperluan"    class="edit-item-purpose" data-idx="${idx}" value="${escHtml(String(purpose))}" />
+    <button class="remove-item-btn" onclick="removeEditItem(${idx})" title="Hapus">✕</button>
+  `;
+  container.appendChild(row);
+  row.querySelector(".edit-item-amount").addEventListener("input", recalcEditTotal);
+  recalcEditTotal();
+}
+
+function removeEditItem(idx) {
+  const row = document.querySelector(`.item-row[data-idx="${idx}"]`);
+  if (row) { row.remove(); recalcEditTotal(); }
+}
+
+function recalcEditTotal() {
+  const amounts = [...document.querySelectorAll(".edit-item-amount")]
+    .map(el => parseFloat(el.value) || 0);
+  document.getElementById("editTotalDisplay").textContent =
+    formatRupiah(amounts.reduce((a, b) => a + b, 0));
+}
+
+function getEditItems() {
+  return [...document.querySelectorAll("#editItemsContainer .item-row")].map(row => ({
+    name:    row.querySelector(".edit-item-name").value.trim(),
+    amount:  parseFloat(row.querySelector(".edit-item-amount").value),
+    purpose: row.querySelector(".edit-item-purpose").value.trim(),
+  }));
+}
+
+// Buka modal edit, isi data dari bon yang ditolak
+async function openEditBonModal(bonId) {
+  const modal      = document.getElementById("editBonModal");
+  const errorDiv   = document.getElementById("editBonError");
+  const successDiv = document.getElementById("editBonSuccess");
+
+  errorDiv.classList.add("hidden");
+  successDiv.classList.add("hidden");
+  document.getElementById("editItemsContainer").innerHTML = "";
+  editItemCount = 0;
+
+  try {
+    // Ambil data bon beserta items
+    const bons = await sbGet("bon", `select=*,bon_items(id,name,amount,purpose)&id=eq.${bonId}`);
+    if (!bons || !bons.length) throw new Error("Data bon tidak ditemukan.");
+    const bon = bons[0];
+
+    document.getElementById("editBonId").value        = bon.id;
+    document.getElementById("editApplicantName").value = bon.applicant_name;
+    document.getElementById("editApplicantNip").value  = bon.applicant_nip || "";
+
+    // Tampilkan alasan penolakan jika ada
+    const rejBox    = document.getElementById("editRejectionInfo");
+    const rejReason = document.getElementById("editRejectionReason");
+    if (bon.rejection_reason) {
+      rejReason.textContent = bon.rejection_reason;
+      rejBox.classList.remove("hidden");
+    } else {
+      rejBox.classList.add("hidden");
+    }
+
+    // Isi item-item yang sudah ada
+    const items = bon.bon_items || [];
+    if (items.length) {
+      items.forEach(item => addEditItem(item.name, item.amount, item.purpose));
+    } else {
+      addEditItem();
+    }
+
+    modal.classList.remove("hidden");
+  } catch (err) {
+    Swal.fire({ title: "Error", text: err.message, icon: "error" });
+  }
+}
+
+document.getElementById("closeEditBonModal").addEventListener("click", () => {
+  document.getElementById("editBonModal").classList.add("hidden");
+});
+document.getElementById("editBonModal").addEventListener("click", (e) => {
+  if (e.target === document.getElementById("editBonModal"))
+    document.getElementById("editBonModal").classList.add("hidden");
+});
+document.getElementById("editAddItemBtn").addEventListener("click", () => addEditItem());
+
+// Submit ajukan ulang
+document.getElementById("submitEditBonBtn").addEventListener("click", async () => {
+  const errorDiv   = document.getElementById("editBonError");
+  const successDiv = document.getElementById("editBonSuccess");
+  const btn        = document.getElementById("submitEditBonBtn");
+  const bonId      = document.getElementById("editBonId").value;
+
+  errorDiv.classList.add("hidden");
+  successDiv.classList.add("hidden");
+
+  const items = getEditItems();
+  if (!items.length) {
+    errorDiv.textContent = "Minimal satu item wajib diisi.";
+    errorDiv.classList.remove("hidden");
+    return;
+  }
+  for (const i of items) {
+    if (!i.name || !i.purpose) {
+      errorDiv.textContent = "Nama dan keperluan setiap item wajib diisi.";
+      errorDiv.classList.remove("hidden");
+      return;
+    }
+    if (!i.amount || i.amount <= 0) {
+      errorDiv.textContent = "Jumlah setiap item harus lebih dari 0.";
+      errorDiv.classList.remove("hidden");
+      return;
+    }
+  }
+
+  const confirm = await Swal.fire({
+    title: "Ajukan Ulang?",
+    html: "Bon ini akan diubah dan diajukan ulang ke PPK.<br>Pastikan sudah sesuai perbaikan.",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonColor: "#3182ce",
+    cancelButtonColor:  "#718096",
+    confirmButtonText:  "Ya, Ajukan Ulang",
+    cancelButtonText:   "Batal",
+  });
+  if (!confirm.isConfirmed) return;
+
+  btn.disabled = true;
+  btn.textContent = "Memproses...";
+
+  try {
+    const totalAmount = items.reduce((s, i) => s + i.amount, 0);
+
+    // 1. Update header bon: reset status ke submitted, hapus rejection_reason
+    await sbPatch("bon", bonId, {
+      total_amount:     totalAmount,
+      status:           "submitted",
+      rejection_reason: "",
+    });
+
+    // 2. Hapus semua bon_items lama
+    await fetch(`${SUPA_URL}/rest/v1/bon_items?bon_id=eq.${bonId}`, {
+      method: "DELETE",
+      headers: { ...SB_HEADERS, "Prefer": "return=minimal" },
+    });
+
+    // 3. Simpan item-item baru
+    for (const item of items) {
+      await sbPost("bon_items", {
+        bon_id:  bonId,
+        name:    item.name,
+        amount:  item.amount,
+        purpose: item.purpose,
+      });
+    }
+
+    successDiv.textContent = "✅ Bon berhasil diajukan ulang!";
+    successDiv.classList.remove("hidden");
+
+    setTimeout(() => {
+      document.getElementById("editBonModal").classList.add("hidden");
+      loadBons();
+    }, 1500);
+  } catch (err) {
+    errorDiv.textContent = err.message;
+    errorDiv.classList.remove("hidden");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "🔄 Ajukan Ulang";
+  }
+});
 
 // ── Refresh & Init ────────────────────────────────────
 document.getElementById("refreshBtn").addEventListener("click", loadBons);
