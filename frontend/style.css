@@ -1,0 +1,873 @@
+/* ═══════════════════════════════════════════════════
+   BON REQUEST SYSTEM – Stylesheet
+   Aesthetic: Clean Government / Official Document
+   Font: IBM Plex Sans (body) + IBM Plex Mono (numbers)
+   ═══════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+/* ── CSS Variables ─────────────────────────────────── */
+:root {
+  --bg:         #f0f2f5;
+  --surface:    #ffffff;
+  --border:     #dde1e7;
+  --border-light: #eaecf0;
+
+  --text-primary:   #1a2332;
+  --text-secondary: #5a6478;
+  --text-muted:     #8a93a6;
+
+  --blue:       #1a5fd0;
+  --blue-dark:  #1349b0;
+  --blue-light: #e8f0fc;
+
+  --green:      #17875a;
+  --green-light:#e6f5ef;
+  --red:        #c0392b;
+  --red-light:  #fdf0ee;
+  --amber:      #b45309;
+  --amber-light:#fef3cd;
+  --purple:     #6d28d9;
+  --purple-light:#f3f0ff;
+  --teal:       #0f766e;
+  --teal-light: #e6fafa;
+
+  --nav-bg:     #1a2332;
+  --nav-text:   #e8edf5;
+
+  --radius-sm:  4px;
+  --radius:     8px;
+  --radius-lg:  12px;
+
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.08);
+  --shadow:     0 2px 8px rgba(0,0,0,0.10);
+  --shadow-lg:  0 8px 24px rgba(0,0,0,0.14);
+
+  --font: 'IBM Plex Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+
+/* ── Reset ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ── Login Page ─────────────────────────────────────── */
+body.login-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1a2332 0%, #1a5fd0 100%);
+  min-height: 100vh;
+}
+
+.login-wrapper {
+  width: 100%;
+  max-width: 420px;
+  padding: 20px;
+}
+
+.login-card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.login-header {
+  background: var(--nav-bg);
+  color: white;
+  padding: 32px 36px 28px;
+  text-align: center;
+}
+
+.login-icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+}
+
+.login-header h1 {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  margin-bottom: 6px;
+}
+
+.login-header p {
+  font-size: 13px;
+  opacity: 0.65;
+}
+
+.login-form {
+  padding: 28px 36px;
+}
+
+.login-footer {
+  padding: 14px 36px 20px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border-light);
+}
+
+/* ── Navbar ─────────────────────────────────────────── */
+.navbar {
+  background: var(--nav-bg);
+  color: var(--nav-text);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  height: 56px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: -0.2px;
+}
+
+.nav-icon { font-size: 20px; }
+
+.nav-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.75);
+}
+
+/* ── Container ─────────────────────────────────────── */
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── Card ───────────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border-light);
+  background: #fafbfc;
+}
+
+.card-header h2 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.card-body {
+  padding: 24px;
+}
+
+/* ── Form Elements ──────────────────────────────────── */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 14px;
+  color: var(--text-primary);
+  background: #fff;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(26,95,208,0.12);
+}
+
+textarea { resize: vertical; min-height: 90px; }
+
+/* ── Item Row ───────────────────────────────────────── */
+.items-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.items-header label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.item-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: start;
+}
+
+.item-row input { margin: 0; }
+
+.remove-item-btn {
+  background: var(--red-light);
+  color: var(--red);
+  border: 1px solid rgba(192,57,43,0.2);
+  border-radius: var(--radius-sm);
+  width: 34px;
+  height: 34px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 0;
+  transition: background 0.15s;
+}
+
+.remove-item-btn:hover { background: #f5c6c0; }
+
+/* ── Total Row ──────────────────────────────────────── */
+.total-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  margin: 4px 0 16px;
+  border-top: 2px solid var(--border-light);
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.total-amount {
+  font-family: var(--font-mono);
+  font-size: 17px;
+  color: var(--blue);
+}
+
+/* ── Buttons ────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-primary {
+  background: var(--blue);
+  color: white;
+  border-color: var(--blue);
+}
+.btn-primary:hover:not(:disabled) { background: var(--blue-dark); border-color: var(--blue-dark); }
+
+.btn-secondary {
+  background: var(--blue-light);
+  color: var(--blue);
+  border-color: rgba(26,95,208,0.2);
+}
+.btn-secondary:hover:not(:disabled) { background: #d6e4fb; }
+
+.btn-outline {
+  background: transparent;
+  color: var(--nav-text);
+  border-color: rgba(255,255,255,0.25);
+}
+.btn-outline:hover:not(:disabled) { background: rgba(255,255,255,0.1); }
+
+.btn-sm { padding: 5px 11px; font-size: 12px; }
+
+.btn-full { width: 100%; margin-top: 8px; padding: 10px; font-size: 14px; }
+
+/* Action buttons in table */
+.btn-approve-ppk  { background: var(--green-light);  color: var(--green);  border-color: rgba(23,135,90,0.2); }
+.btn-approve-ppk:hover  { background: #cceddf; }
+
+.btn-approve-kpl  { background: var(--purple-light); color: var(--purple); border-color: rgba(109,40,217,0.2); }
+.btn-approve-kpl:hover  { background: #e0d8fa; }
+
+.btn-disburse     { background: var(--amber-light);  color: var(--amber);  border-color: rgba(180,83,9,0.2); }
+.btn-disburse:hover     { background: #fde8a0; }
+
+.btn-delete { background: var(--red-light); color: var(--red); border-color: rgba(192,57,43,0.2); }
+.btn-delete:hover { background: #f5c6c0; }
+
+
+
+/* ── Status Badge ───────────────────────────────────── */
+.badge {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.badge-submitted        { background: var(--blue-light);   color: var(--blue); }
+.badge-approved_ppk     { background: var(--green-light);  color: var(--green); }
+.badge-approved_kalapas { background: var(--purple-light); color: var(--purple); }
+.badge-disbursed        { background: var(--amber-light);  color: var(--amber); }
+.badge-completed        { background: #e6e6e6;             color: #444; }
+
+/* ── Table ──────────────────────────────────────────── */
+.table-wrapper { overflow-x: auto; }
+
+.bon-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.bon-table thead tr {
+  background: #f5f6f8;
+  border-bottom: 2px solid var(--border);
+}
+
+.bon-table th {
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.bon-table td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border-light);
+  vertical-align: middle;
+}
+
+.bon-table tbody tr:hover { background: #f9fafc; }
+.bon-table tbody tr:last-child td { border-bottom: none; }
+
+.bon-table .loading-row {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 32px;
+}
+
+.amount-cell {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.actions-cell {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.lpj-link {
+  color: var(--blue);
+  text-decoration: none;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.lpj-link:hover { text-decoration: underline; }
+
+/* ── File Upload ────────────────────────────────────── */
+.file-upload-area {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  position: relative;
+}
+
+.file-upload-area:hover {
+  border-color: var(--blue);
+  background: var(--blue-light);
+}
+
+.file-upload-area input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+
+.file-hint { font-size: 13px; color: var(--text-muted); display: block; }
+.file-name { font-size: 13px; color: var(--green); font-weight: 500; display: block; }
+
+/* ── Modal ──────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10,15,25,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 20px;
+  backdrop-filter: blur(2px);
+}
+
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 480px;
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--border-light);
+  background: #fafbfc;
+}
+
+.modal-header h3 { font-size: 15px; font-weight: 600; }
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: var(--text-muted);
+  line-height: 1;
+  padding: 0 4px;
+}
+.modal-close:hover { color: var(--text-primary); }
+
+.modal-body { padding: 22px; }
+
+/* ── Messages ───────────────────────────────────────── */
+.error-msg {
+  background: var(--red-light);
+  color: var(--red);
+  border: 1px solid rgba(192,57,43,0.2);
+  border-radius: var(--radius-sm);
+  padding: 9px 13px;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.success-msg {
+  background: var(--green-light);
+  color: var(--green);
+  border: 1px solid rgba(23,135,90,0.2);
+  border-radius: var(--radius-sm);
+  padding: 9px 13px;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.hidden { display: none !important; }
+
+/* ── Detail Panel (expand/collapse) ────────────────── */
+.bon-main-row:hover { background: #f0f4ff !important; }
+
+.bon-detail-row td { padding: 0 !important; }
+
+.detail-panel {
+  padding: 16px 24px 20px;
+  border-left: 4px solid var(--blue);
+}
+
+.detail-panel-header {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--blue);
+  margin-bottom: 12px;
+}
+
+.detail-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.detail-table th {
+  padding: 7px 12px;
+  background: var(--blue-light);
+  color: var(--blue);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  text-align: left;
+  border-bottom: 1px solid rgba(26,95,208,0.15);
+}
+
+.detail-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text-primary);
+}
+
+.detail-table tbody tr:last-child td { border-bottom: 1px solid var(--border); }
+
+.detail-table tfoot td {
+  padding: 9px 12px;
+  background: #f0f4ff;
+  border-bottom: none;
+  font-size: 13px;
+}
+
+.detail-lpj-note {
+  margin-top: 12px;
+  padding: 9px 13px;
+  background: var(--teal-light);
+  border-left: 3px solid var(--teal);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  color: var(--teal);
+}
+
+/* ── Items detail (expandable in table) ─────────────── */
+.items-detail {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ── Password Field ─────────────────────────────────── */
+.password-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrap input {
+  padding-right: 40px;
+}
+
+.toggle-pw {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 2px;
+  color: var(--text-muted);
+}
+
+.toggle-pw:hover { color: var(--text-primary); }
+
+/* ── Admin Form Grid ────────────────────────────────── */
+.admin-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 700px) {
+  .admin-form-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Self badge / pw hint ───────────────────────────── */
+.self-badge {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.pw-hint {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-muted);
+  margin-left: 4px;
+}
+
+/* ── Login page additions ───────────────────────────── */
+
+/* ── Responsive ─────────────────────────────────────── */
+@media (max-width: 680px) {
+  .item-row {
+    grid-template-columns: 1fr 1fr;
+  }
+  .item-row input:last-of-type { grid-column: 1 / -1; }
+  .navbar { padding: 0 14px; }
+  .card-body { padding: 16px; }
+  .container { padding: 16px 12px; }
+}
+
+/* ═══════════════════════════════════════════════
+   CSS TAMBAHAN — Tempel ke bagian bawah style.css
+   ═══════════════════════════════════════════════ */
+
+/* ── Search box di atas dropdown pegawai ── */
+.pegawai-search-wrap {
+  margin-bottom: 6px;
+}
+.pegawai-search-wrap input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ── Info NIP setelah dropdown dipilih ── */
+.selected-pegawai-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 6px 10px;
+  background: var(--bg-secondary, #f4f6f8);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 6px;
+  font-size: 13px;
+}
+.selected-pegawai-info .info-label {
+  color: var(--text-muted, #94a3b8);
+  font-weight: 500;
+}
+.selected-pegawai-info .info-value {
+  font-family: var(--font-mono, monospace);
+  font-weight: 600;
+  color: var(--text-primary, #1e293b);
+  letter-spacing: 0.02em;
+}
+
+/* ── Search input kecil di header card ── */
+.search-input-sm {
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 6px;
+  font-size: 13px;
+  background: var(--bg-primary, #fff);
+  color: var(--text-primary, #1e293b);
+  outline: none;
+  transition: border-color 0.15s;
+  min-width: 180px;
+}
+.search-input-sm:focus {
+  border-color: var(--blue, #3b82f6);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+}
+.search-input-sm::placeholder {
+  color: var(--text-muted, #94a3b8);
+}
+/* ═══════════════════════════════════════════════
+   CSS TAMBAHAN — Tempel ke bagian bawah style.css
+   ═══════════════════════════════════════════════ */
+
+/* ── Custom Combobox ── */
+.combobox-wrap {
+  position: relative;
+  width: 100%;
+}
+
+/* Input utama — tampak seperti select biasa */
+.combobox-input {
+  width: 100%;
+  box-sizing: border-box;
+  cursor: pointer;
+  padding-right: 36px !important; /* ruang untuk arrow */
+  background: var(--bg-primary, #fff) !important;
+  caret-color: transparent; /* tidak ada cursor ketik di sini */
+  user-select: none;
+}
+.combobox-input:focus {
+  outline: none;
+}
+
+/* Panah dropdown */
+.combobox-arrow {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted, #94a3b8);
+  font-size: 13px;
+  pointer-events: none;
+  transition: transform 0.2s ease;
+  line-height: 1;
+}
+
+/* Panel dropdown */
+.combobox-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 200;
+  background: var(--bg-primary, #fff);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  overflow: hidden;
+}
+
+/* Search di dalam dropdown */
+.combobox-search-wrap {
+  padding: 8px 8px 4px;
+  border-bottom: 1px solid var(--border, #e2e8f0);
+}
+.combobox-search {
+  width: 100%;
+  box-sizing: border-box;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 6px;
+  font-size: 13px;
+  background: var(--bg-secondary, #f8fafc);
+  color: var(--text-primary, #1e293b);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.combobox-search:focus {
+  border-color: var(--blue, #3b82f6);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+}
+
+/* List item */
+.combobox-list {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.combobox-item {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 9px 14px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.combobox-item:hover,
+.combobox-item.selected {
+  background: var(--bg-secondary, #f1f5f9);
+}
+.combobox-item.selected .combo-nama {
+  color: var(--blue, #3b82f6);
+  font-weight: 600;
+}
+.combo-nama {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary, #1e293b);
+  line-height: 1.3;
+}
+.combo-nip {
+  font-size: 11px;
+  color: var(--text-muted, #94a3b8);
+  font-family: var(--font-mono, monospace);
+}
+.combobox-empty {
+  padding: 14px;
+  text-align: center;
+  color: var(--text-muted, #94a3b8);
+  font-size: 13px;
+  font-style: italic;
+}
+
+/* ── Info NIP badge setelah pilih ── */
+.selected-pegawai-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 6px 10px;
+  background: var(--bg-secondary, #f4f6f8);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 6px;
+  font-size: 13px;
+}
+.selected-pegawai-info .info-label {
+  color: var(--text-muted, #94a3b8);
+  font-weight: 500;
+}
+.selected-pegawai-info .info-value {
+  font-family: var(--font-mono, monospace);
+  font-weight: 600;
+  color: var(--text-primary, #1e293b);
+  letter-spacing: 0.02em;
+}
+
+/* ── Search input kecil di header card admin ── */
+.search-input-sm {
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 6px;
+  font-size: 13px;
+  background: var(--bg-primary, #fff);
+  color: var(--text-primary, #1e293b);
+  outline: none;
+  transition: border-color 0.15s;
+  min-width: 180px;
+}
+.search-input-sm:focus {
+  border-color: var(--blue, #3b82f6);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+}
+.search-input-sm::placeholder {
+  color: var(--text-muted, #94a3b8);
+}

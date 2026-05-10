@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard – Bon Request System</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ── Navbar ── -->
+  <nav class="navbar">
+    <div class="nav-brand">
+      <span class="nav-icon">📋</span>
+      <span>Bon Request System</span>
+    </div>
+    <div class="nav-user">
+      <span id="navUserInfo"></span>
+      <button class="btn btn-outline btn-sm" id="logoutBtn">Keluar</button>
+    </div>
+  </nav>
+
+  <div class="container">
+
+    <!-- ── Create Bon Form (pegawai only) ── -->
+    <section class="card" id="createSection">
+      <div class="card-header">
+        <h2>📝 Buat Pengajuan Bon Baru</h2>
+      </div>
+      <div class="card-body">
+
+        <!-- Custom Combobox Pemohon -->
+        <div class="form-group">
+          <label>Nama Pemohon</label>
+          <div class="combobox-wrap" id="comboboxWrap">
+            <input
+              type="text"
+              id="pegawaiSearch"
+              class="combobox-input"
+              placeholder="Ketik nama atau NIP..."
+              autocomplete="off"
+              readonly
+            />
+            <span class="combobox-arrow" id="comboboxArrow">▾</span>
+            <div class="combobox-dropdown hidden" id="comboboxDropdown">
+              <div class="combobox-search-wrap">
+                <input
+                  type="text"
+                  id="comboboxSearchInput"
+                  class="combobox-search"
+                  placeholder="🔍 Cari nama atau NIP..."
+                  autocomplete="off"
+                />
+              </div>
+              <ul class="combobox-list" id="comboboxList"></ul>
+            </div>
+          </div>
+          <input type="hidden" id="applicantSelectId" />
+          <input type="hidden" id="applicantSelectNama" />
+          <input type="hidden" id="applicantSelectNip" />
+          <div id="selectedPegawaiInfo" class="selected-pegawai-info hidden">
+            <span class="info-label">NIP:</span>
+            <span id="selectedNip" class="info-value">–</span>
+          </div>
+        </div>
+
+        <div class="items-section">
+          <div class="items-header">
+            <label>Rincian Item</label>
+            <button class="btn btn-sm btn-secondary" id="addItemBtn">+ Tambah Item</button>
+          </div>
+          <div id="itemsContainer"></div>
+        </div>
+
+        <div class="total-row">
+          <span>Total:</span>
+          <span id="totalDisplay" class="total-amount">Rp 0</span>
+        </div>
+
+        <div id="createError"   class="error-msg hidden"></div>
+        <div id="createSuccess" class="success-msg hidden"></div>
+
+        <button class="btn btn-primary" id="submitBonBtn">Ajukan Bon</button>
+      </div>
+    </section>
+
+    <!-- ── LPJ Modal ── -->
+    <div class="modal-overlay hidden" id="lpjModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>📄 Upload LPJ</h3>
+          <button class="modal-close" id="closeLpjModal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="lpjBonId" />
+          <div class="form-group">
+            <label>Deskripsi LPJ</label>
+            <textarea id="lpjDescription" rows="4" placeholder="Tuliskan keterangan pertanggungjawaban..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>File LPJ</label>
+            <div class="file-upload-area" id="fileUploadArea">
+              <input type="file" id="lpjFile" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
+              <span class="file-hint">📎 Klik atau seret file ke sini (PDF, JPG, PNG, DOC, DOCX — maks 10MB)</span>
+              <span class="file-name hidden" id="fileName"></span>
+            </div>
+          </div>
+          <div id="lpjError"   class="error-msg hidden"></div>
+          <div id="lpjSuccess" class="success-msg hidden"></div>
+          <button class="btn btn-primary btn-full" id="submitLpjBtn">Upload LPJ</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Bon Table ── -->
+    <section class="card">
+      <div class="card-header">
+        <h2>📊 Daftar Pengajuan Bon</h2>
+        <button class="btn btn-sm btn-outline" id="refreshBtn">↻ Refresh</button>
+      </div>
+      <div class="card-body">
+        <div id="tableError" class="error-msg hidden"></div>
+        <div class="table-wrapper">
+          <table class="bon-table" id="bonTable">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Nama Pemohon</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>LPJ</th>
+                <th>Tanggal</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="bonTableBody">
+              <tr><td colspan="7" class="loading-row">Memuat data...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- supabase.js HARUS di-load sebelum script.js -->
+  <script src="supabase.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

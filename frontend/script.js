@@ -1,0 +1,496 @@
+// ═══════════════════════════════════════════════════
+//  BON REQUEST SYSTEM – Frontend Script (Supabase)
+// ═══════════════════════════════════════════════════
+//  Kolom tabel bons:
+//    nama_pemohon, applicant_nip, jumlah_total,
+//    items (JSONB), status, lpj_file, lpj_description,
+//    created_at, id
+//  Requires: supabase.js di-load sebelum file ini
+
+// ── Auth Guard ───────────────────────────────────────
+const userRaw = sessionStorage.getItem("user");
+if (!userRaw) window.location.href = "login.html";
+const user = JSON.parse(userRaw);
+if (user.role === "admin") window.location.href = "admin.html";
+
+// ── Helpers ──────────────────────────────────────────
+function formatRupiah(num) {
+  return "Rp " + Number(num).toLocaleString("id-ID");
+}
+
+function formatDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
+}
+
+function statusLabel(status) {
+  const labels = {
+    submitted:        "Diajukan",
+    approved_ppk:     "Disetujui PPK",
+    approved_kalapas: "Disetujui Kalapas",
+    disbursed:        "Dicairkan",
+    completed:        "Selesai (LPJ)",
+  };
+  return labels[status] || status;
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+// ── Navbar ───────────────────────────────────────────
+document.getElementById("navUserInfo").textContent =
+  `👤 ${user.username} (${user.role.toUpperCase()})`;
+
+document.getElementById("logoutBtn").addEventListener("click", () => {
+  sessionStorage.removeItem("user");
+  window.location.href = "login.html";
+});
+
+// ── Show/Hide Create Section ──────────────────────────
+const createSection = document.getElementById("createSection");
+if (user.role !== "pegawai") createSection.style.display = "none";
+
+// ═══════════════════════════════════════════════════
+//  CUSTOM COMBOBOX PEGAWAI
+// ═══════════════════════════════════════════════════
+
+let allPegawai      = [];
+let selectedPegawai = null;
+
+const comboInput    = document.getElementById("pegawaiSearch");
+const comboDropdown = document.getElementById("comboboxDropdown");
+const comboList     = document.getElementById("comboboxList");
+const comboArrow    = document.getElementById("comboboxArrow");
+const comboSearch   = document.getElementById("comboboxSearchInput");
+const comboWrap     = document.getElementById("comboboxWrap");
+
+function openCombobox() {
+  comboDropdown.classList.remove("hidden");
+  comboArrow.style.transform = "rotate(180deg)";
+  comboSearch.value = "";
+  renderComboList(allPegawai);
+  setTimeout(() => comboSearch.focus(), 50);
+}
+
+function closeCombobox() {
+  comboDropdown.classList.add("hidden");
+  comboArrow.style.transform = "rotate(0deg)";
+}
+
+function renderComboList(list) {
+  comboList.innerHTML = "";
+  if (!list.length) {
+    comboList.innerHTML = `<li class="combobox-empty">Tidak ada pegawai ditemukan</li>`;
+    return;
+  }
+  list.forEach(p => {
+    const li = document.createElement("li");
+    li.className = "combobox-item";
+    if (selectedPegawai && selectedPegawai.id === p.id) li.classList.add("selected");
+    li.innerHTML = `
+      <span class="combo-nama">${escHtml(p.nama)}</span>
+      <span class="combo-nip">NIP: ${escHtml(p.nip)}</span>
+    `;
+    li.addEventListener("mousedown", (e) => { e.preventDefault(); selectPegawai(p); });
+    comboList.appendChild(li);
+  });
+}
+
+function selectPegawai(p) {
+  selectedPegawai = p;
+  comboInput.value = p.nama;
+  document.getElementById("applicantSelectId").value   = p.id;
+  document.getElementById("applicantSelectNama").value = p.nama;
+  document.getElementById("applicantSelectNip").value  = p.nip;
+  document.getElementById("selectedNip").textContent   = p.nip;
+  document.getElementById("selectedPegawaiInfo").classList.remove("hidden");
+  closeCombobox();
+}
+
+function clearCombobox() {
+  selectedPegawai = null;
+  comboInput.value = "";
+  document.getElementById("applicantSelectId").value   = "";
+  document.getElementById("applicantSelectNama").value = "";
+  document.getElementById("applicantSelectNip").value  = "";
+  document.getElementById("selectedPegawaiInfo").classList.add("hidden");
+  document.getElementById("selectedNip").textContent   = "–";
+}
+
+comboInput.addEventListener("click", openCombobox);
+comboSearch.addEventListener("input", function () {
+  const q = this.value.trim().toLowerCase();
+  if (!q) { renderComboList(allPegawai); return; }
+  renderComboList(allPegawai.filter(p =>
+    p.nama.toLowerCase().includes(q) || p.nip.toLowerCase().includes(q)
+  ));
+});
+document.addEventListener("click", (e) => {
+  if (!comboWrap.contains(e.target)) closeCombobox();
+});
+
+async function loadPegawaiOptions() {
+  try {
+    allPegawai = await sbGet("pegawai", "select=id,nama,nip&order=nama.asc");
+    renderComboList(allPegawai);
+  } catch {
+    console.warn("Gagal memuat daftar pegawai.");
+  }
+}
+
+if (user.role === "pegawai") loadPegawaiOptions();
+
+// ═══════════════════════════════════════════════════
+//  ITEMS MANAGEMENT
+// ═══════════════════════════════════════════════════
+
+let itemCount = 0;
+
+function addItem() {
+  itemCount++;
+  const idx = itemCount;
+  const container = document.getElementById("itemsContainer");
+  const row = document.createElement("div");
+  row.className = "item-row";
+  row.dataset.idx = idx;
+  row.innerHTML = `
+    <input type="text"   placeholder="Nama item"    class="item-name"    data-idx="${idx}" />
+    <input type="number" placeholder="Jumlah (Rp)"  class="item-amount"  data-idx="${idx}" min="1" />
+    <input type="text"   placeholder="Keperluan"    class="item-purpose" data-idx="${idx}" />
+    <button class="remove-item-btn" onclick="removeItem(${idx})" title="Hapus">✕</button>
+  `;
+  container.appendChild(row);
+  row.querySelector(".item-amount").addEventListener("input", recalcTotal);
+}
+
+function removeItem(idx) {
+  const row = document.querySelector(`.item-row[data-idx="${idx}"]`);
+  if (row) { row.remove(); recalcTotal(); }
+}
+
+function recalcTotal() {
+  const amounts = [...document.querySelectorAll(".item-amount")]
+    .map(el => parseFloat(el.value) || 0);
+  document.getElementById("totalDisplay").textContent =
+    formatRupiah(amounts.reduce((a, b) => a + b, 0));
+}
+
+function getItems() {
+  return [...document.querySelectorAll(".item-row")].map(row => ({
+    name:    row.querySelector(".item-name").value.trim(),
+    amount:  parseFloat(row.querySelector(".item-amount").value),
+    purpose: row.querySelector(".item-purpose").value.trim(),
+  }));
+}
+
+document.getElementById("addItemBtn").addEventListener("click", addItem);
+addItem();
+
+// ── Submit Bon ───────────────────────────────────────
+document.getElementById("submitBonBtn").addEventListener("click", async () => {
+  const errorDiv   = document.getElementById("createError");
+  const successDiv = document.getElementById("createSuccess");
+  const btn        = document.getElementById("submitBonBtn");
+
+  errorDiv.classList.add("hidden");
+  successDiv.classList.add("hidden");
+
+  const pemohonNama = document.getElementById("applicantSelectNama").value;
+  const pemohonNip  = document.getElementById("applicantSelectNip").value;
+
+  if (!pemohonNama) {
+    errorDiv.textContent = "Pilih nama pemohon terlebih dahulu.";
+    errorDiv.classList.remove("hidden");
+    return;
+  }
+
+  const items = getItems();
+  if (!items.length) {
+    errorDiv.textContent = "Minimal satu item wajib diisi.";
+    errorDiv.classList.remove("hidden");
+    return;
+  }
+  for (const i of items) {
+    if (!i.name || !i.purpose) {
+      errorDiv.textContent = "Nama dan keperluan setiap item wajib diisi.";
+      errorDiv.classList.remove("hidden");
+      return;
+    }
+    if (!i.amount || i.amount <= 0) {
+      errorDiv.textContent = "Jumlah setiap item harus lebih dari 0.";
+      errorDiv.classList.remove("hidden");
+      return;
+    }
+  }
+
+  btn.disabled = true;
+  btn.textContent = "Memproses...";
+
+  try {
+    await sbPost("bons", {
+      nama_pemohon:  pemohonNama,
+      applicant_nip: pemohonNip,
+      items:         items,
+      jumlah_total:  items.reduce((s, i) => s + i.amount, 0),
+      status:        "submitted",
+    });
+
+    successDiv.textContent = "✅ Bon berhasil diajukan!";
+    successDiv.classList.remove("hidden");
+    clearCombobox();
+    document.getElementById("itemsContainer").innerHTML = "";
+    itemCount = 0;
+    addItem();
+    recalcTotal();
+    errorDiv.classList.add("hidden");
+    setTimeout(() => successDiv.classList.add("hidden"), 3000);
+    loadBons();
+  } catch (err) {
+    errorDiv.textContent = err.message;
+    errorDiv.classList.remove("hidden");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Ajukan Bon";
+  }
+});
+
+// ═══════════════════════════════════════════════════
+//  LOAD & RENDER BON TABLE
+// ═══════════════════════════════════════════════════
+
+async function loadBons() {
+  const tbody    = document.getElementById("bonTableBody");
+  const errorDiv = document.getElementById("tableError");
+  tbody.innerHTML = `<tr><td colspan="7" class="loading-row">Memuat data...</td></tr>`;
+  errorDiv.classList.add("hidden");
+
+  try {
+    const bons = await sbGet("bons", "select=*&order=created_at.desc");
+
+    if (!bons.length) {
+      tbody.innerHTML = `<tr><td colspan="7" class="loading-row">Belum ada pengajuan bon.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = "";
+    bons.forEach((bon, index) => {
+      const tr = document.createElement("tr");
+      tr.className = "bon-row";
+      tr.innerHTML = `
+        <td>
+          <span class="row-chevron" id="icon-${bon.id}" style="display:inline-block;transition:transform .2s;">▶</span>
+          ${index + 1}
+        </td>
+        <td>
+          <strong>${escHtml(bon.nama_pemohon)}</strong>
+          ${bon.applicant_nip ? `<br><small style="color:var(--text-muted);font-size:11px;">NIP: ${escHtml(bon.applicant_nip)}</small>` : ""}
+        </td>
+        <td style="font-family:var(--font-mono);font-weight:500;">${formatRupiah(bon.jumlah_total)}</td>
+        <td><span class="badge badge-${bon.status}">${statusLabel(bon.status)}</span></td>
+        <td>${renderLpj(bon)}</td>
+        <td>${formatDate(bon.created_at)}</td>
+        <td class="actions-cell">${renderActions(bon)}</td>
+      `;
+
+      // Detail row (items)
+      const trDetail = document.createElement("tr");
+      trDetail.className = "bon-detail-row hidden";
+      const items = Array.isArray(bon.items) ? bon.items : JSON.parse(bon.items || "[]");
+      trDetail.innerHTML = `
+        <td colspan="7">
+          <div class="detail-panel">
+            <table class="detail-items-table">
+              <thead>
+                <tr><th>#</th><th>Nama Item</th><th>Keperluan</th><th style="text-align:right;">Jumlah</th></tr>
+              </thead>
+              <tbody>
+                ${items.map((item, idx) => `
+                  <tr>
+                    <td>${idx + 1}</td>
+                    <td>${escHtml(item.name)}</td>
+                    <td>${escHtml(item.purpose)}</td>
+                    <td style="text-align:right;font-family:var(--font-mono);font-weight:500;">${formatRupiah(item.amount)}</td>
+                  </tr>
+                `).join("")}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="3" style="text-align:right;font-weight:600;color:var(--text-secondary);">TOTAL</td>
+                  <td style="text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--blue);">${formatRupiah(bon.jumlah_total)}</td>
+                </tr>
+              </tfoot>
+            </table>
+            ${bon.lpj_description ? `<div class="detail-lpj-note">📝 Keterangan LPJ: ${escHtml(bon.lpj_description)}</div>` : ""}
+          </div>
+        </td>
+      `;
+
+      tr.addEventListener("click", (e) => {
+        if (e.target.closest("button") || e.target.closest("a")) return;
+        const isOpen = !trDetail.classList.contains("hidden");
+        const icon   = document.getElementById(`icon-${bon.id}`);
+        if (isOpen) {
+          trDetail.classList.add("hidden");
+          if (icon) icon.style.transform = "rotate(0deg)";
+        } else {
+          trDetail.classList.remove("hidden");
+          if (icon) icon.style.transform = "rotate(90deg)";
+        }
+      });
+
+      tbody.appendChild(tr);
+      tbody.appendChild(trDetail);
+    });
+  } catch (err) {
+    errorDiv.textContent = err.message;
+    errorDiv.classList.remove("hidden");
+    tbody.innerHTML = `<tr><td colspan="7" class="loading-row">Gagal memuat data.</td></tr>`;
+  }
+}
+
+function renderLpj(bon) {
+  if (bon.lpj_file) {
+    return `<a href="${sbFileUrl('lpj-files', bon.lpj_file)}" target="_blank" class="lpj-link" title="${escHtml(bon.lpj_description || '')}">📄 Lihat LPJ</a>`;
+  }
+  return `<span style="color:var(--text-muted);font-size:12px;">–</span>`;
+}
+
+function renderActions(bon) {
+  const btns = [];
+
+  if (user.role === "ppk" && bon.status === "submitted")
+    btns.push(`<button class="btn btn-sm btn-approve-ppk" onclick="updateStatus('${bon.id}','approved_ppk')">✓ Setujui (PPK)</button>`);
+
+  if (user.role === "kalapas" && bon.status === "approved_ppk")
+    btns.push(`<button class="btn btn-sm btn-approve-kpl" onclick="updateStatus('${bon.id}','approved_kalapas')">✓ Setujui (Kalapas)</button>`);
+
+  if (user.role === "bendahara" && bon.status === "approved_kalapas")
+    btns.push(`<button class="btn btn-sm btn-disburse" onclick="updateStatus('${bon.id}','disbursed')">💰 Cairkan</button>`);
+
+  if (user.role === "pegawai" && bon.status === "disbursed")
+    btns.push(`<button class="btn btn-sm btn-lpj" onclick="openLpjModal('${bon.id}')">📄 Upload LPJ</button>`);
+
+  if (["ppk","kalapas","bendahara","admin"].includes(user.role))
+    btns.push(`<button class="btn btn-sm btn-delete" onclick="deleteBon('${bon.id}',\`${escHtml(bon.nama_pemohon)}\`)">🗑 Hapus</button>`);
+
+  return btns.join("") || `<span style="color:var(--text-muted);font-size:12px;">–</span>`;
+}
+
+// ── Delete Bon ───────────────────────────────────────
+async function deleteBon(id, name) {
+  if (!confirm(`Hapus bon milik "${name}"?\n\nData akan dihapus permanen.`)) return;
+  try {
+    await sbDelete("bons", id);
+    loadBons();
+  } catch (err) { alert("Error: " + err.message); }
+}
+
+// ── Update Status ────────────────────────────────────
+async function updateStatus(id, status) {
+  if (!confirm(`Konfirmasi ubah status menjadi: "${statusLabel(status)}"?`)) return;
+  try {
+    await sbPatch("bons", id, { status });
+    loadBons();
+  } catch (err) { alert("Error: " + err.message); }
+}
+
+// ── LPJ Modal ────────────────────────────────────────
+function openLpjModal(bonId) {
+  document.getElementById("lpjBonId").value = bonId;
+  document.getElementById("lpjDescription").value = "";
+  document.getElementById("lpjFile").value = "";
+  document.getElementById("fileName").textContent = "";
+  document.getElementById("fileName").classList.add("hidden");
+  const hintEl = document.querySelector(".file-hint");
+  if (hintEl) hintEl.classList.remove("hidden");
+  document.getElementById("lpjError").classList.add("hidden");
+  document.getElementById("lpjSuccess").classList.add("hidden");
+  document.getElementById("lpjModal").classList.remove("hidden");
+}
+
+document.getElementById("closeLpjModal").addEventListener("click", () => {
+  document.getElementById("lpjModal").classList.add("hidden");
+});
+document.getElementById("lpjModal").addEventListener("click", (e) => {
+  if (e.target === document.getElementById("lpjModal"))
+    document.getElementById("lpjModal").classList.add("hidden");
+});
+
+document.getElementById("lpjFile").addEventListener("change", (e) => {
+  const file   = e.target.files[0];
+  const nameEl = document.getElementById("fileName");
+  const hintEl = document.querySelector(".file-hint");
+  if (file) {
+    nameEl.textContent = "✅ " + file.name;
+    nameEl.classList.remove("hidden");
+    if (hintEl) hintEl.classList.add("hidden");
+  } else {
+    nameEl.classList.add("hidden");
+    if (hintEl) hintEl.classList.remove("hidden");
+  }
+});
+
+// ── Submit LPJ ───────────────────────────────────────
+document.getElementById("submitLpjBtn").addEventListener("click", async () => {
+  const bonId       = document.getElementById("lpjBonId").value;
+  const description = document.getElementById("lpjDescription").value.trim();
+  const fileInput   = document.getElementById("lpjFile");
+  const errorDiv    = document.getElementById("lpjError");
+  const successDiv  = document.getElementById("lpjSuccess");
+  const btn         = document.getElementById("submitLpjBtn");
+
+  errorDiv.classList.add("hidden");
+  successDiv.classList.add("hidden");
+
+  if (!description) {
+    errorDiv.textContent = "Deskripsi LPJ wajib diisi.";
+    errorDiv.classList.remove("hidden");
+    return;
+  }
+  if (!fileInput.files[0]) {
+    errorDiv.textContent = "File LPJ wajib diunggah.";
+    errorDiv.classList.remove("hidden");
+    return;
+  }
+  const file = fileInput.files[0];
+  if (file.size > 10 * 1024 * 1024) {
+    errorDiv.textContent = "Ukuran file maksimal 10MB.";
+    errorDiv.classList.remove("hidden");
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = "Mengunggah...";
+
+  try {
+    // 1. Upload file ke Supabase Storage bucket 'lpj-files'
+    const filename = await sbUploadFile("lpj-files", file);
+
+    // 2. Update dua kolom terpisah: lpj_file dan lpj_description
+    await sbPatch("bons", bonId, {
+      lpj_file:        filename,
+      lpj_description: description,
+      status:          "completed",
+    });
+
+    successDiv.textContent = "✅ LPJ berhasil diunggah!";
+    successDiv.classList.remove("hidden");
+    setTimeout(() => {
+      document.getElementById("lpjModal").classList.add("hidden");
+      loadBons();
+    }, 1500);
+  } catch (err) {
+    errorDiv.textContent = err.message;
+    errorDiv.classList.remove("hidden");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Upload LPJ";
+  }
+});
+
+// ── Refresh & Init ────────────────────────────────────
+document.getElementById("refreshBtn").addEventListener("click", loadBons);
+loadBons();

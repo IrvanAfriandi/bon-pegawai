@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin – Manajemen User</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-brand">
+      <span class="nav-icon">⚙️</span>
+      <span>Admin – Manajemen User</span>
+    </div>
+    <div class="nav-user">
+      <span id="navUserInfo"></span>
+      <a href="index.html" class="btn btn-outline btn-sm">📋 Bon</a>
+      <button class="btn btn-outline btn-sm" id="logoutBtn">Keluar</button>
+    </div>
+  </nav>
+
+  <div class="container">
+
+    <!-- ══════════════════════════════════════
+         SECTION 1 — Tambah / Edit User
+    ══════════════════════════════════════ -->
+    <section class="card">
+      <div class="card-header">
+        <h2 id="formTitle">➕ Tambah User Baru</h2>
+      </div>
+      <div class="card-body">
+        <div class="admin-form-grid">
+          <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="fUsername" placeholder="Contoh: budi_ppk" />
+          </div>
+          <div class="form-group">
+            <label>Password <span id="pwHint" class="pw-hint">(kosongkan jika tidak ingin ganti)</span></label>
+            <div class="password-wrap">
+              <input type="password" id="fPassword" placeholder="Min. 6 karakter" />
+              <button type="button" class="toggle-pw" id="toggleFPw">👁</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Role</label>
+            <select id="fRole">
+              <option value="">-- Pilih Role --</option>
+              <option value="pegawai">Pegawai</option>
+              <option value="ppk">PPK</option>
+              <option value="kalapas">Kalapas</option>
+              <option value="bendahara">Bendahara</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+        </div>
+
+        <input type="hidden" id="editUserId" />
+        <div id="formError"   class="error-msg hidden"></div>
+        <div id="formSuccess" class="success-msg hidden"></div>
+
+        <div style="display:flex;gap:10px;margin-top:4px;">
+          <button class="btn btn-primary" id="saveUserBtn">Simpan</button>
+          <button class="btn btn-secondary hidden" id="cancelEditBtn">Batal Edit</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════
+         SECTION 2 — Daftar User
+    ══════════════════════════════════════ -->
+    <section class="card">
+      <div class="card-header">
+        <h2>👥 Daftar User</h2>
+        <button class="btn btn-sm btn-outline" id="refreshUsersBtn">↻ Refresh</button>
+      </div>
+      <div class="card-body">
+        <div id="tableError" class="error-msg hidden"></div>
+        <div class="table-wrapper">
+          <table class="bon-table" id="userTable">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="userTableBody">
+              <tr><td colspan="4" class="loading-row">Memuat data...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════
+         SECTION 3 — Tambah / Edit Pegawai
+    ══════════════════════════════════════ -->
+    <section class="card">
+      <div class="card-header">
+        <h2 id="pegawaiFormTitle">🪪 Tambah Pegawai</h2>
+      </div>
+      <div class="card-body">
+        <div class="admin-form-grid">
+          <div class="form-group">
+            <label>Nama Lengkap</label>
+            <input type="text" id="fNama" placeholder="Contoh: Budi Santoso" />
+          </div>
+          <div class="form-group">
+            <label>NIP</label>
+            <input type="text" id="fNip" placeholder="Contoh: 198501012010011001" />
+          </div>
+        </div>
+
+        <input type="hidden" id="editPegawaiId" />
+        <div id="pegawaiFormError"   class="error-msg hidden"></div>
+        <div id="pegawaiFormSuccess" class="success-msg hidden"></div>
+
+        <div style="display:flex;gap:10px;margin-top:4px;">
+          <button class="btn btn-primary" id="savePegawaiBtn">Simpan Pegawai</button>
+          <button class="btn btn-secondary hidden" id="cancelEditPegawaiBtn">Batal Edit</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════
+         SECTION 4 — Daftar Pegawai
+    ══════════════════════════════════════ -->
+    <section class="card">
+      <div class="card-header">
+        <h2>📋 Daftar Pegawai</h2>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input
+            type="text"
+            id="pegawaiSearchAdmin"
+            placeholder="🔍 Cari nama / NIP..."
+            class="search-input-sm"
+          />
+          <button class="btn btn-sm btn-outline" id="refreshPegawaiBtn">↻ Refresh</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div id="pegawaiTableError" class="error-msg hidden"></div>
+        <div class="table-wrapper">
+          <table class="bon-table" id="pegawaiTable">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Nama Lengkap</th>
+                <th>NIP</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="pegawaiTableBody">
+              <tr><td colspan="4" class="loading-row">Memuat data...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Load supabase.js DULU, baru script admin -->
+  <script src="supabase.js"></script>
+  <script>
+    // ── Auth guard (admin only) ──
+    const userRaw = sessionStorage.getItem("user");
+    if (!userRaw) window.location.href = "login.html";
+    const me = JSON.parse(userRaw);
+    if (me.role !== "admin") window.location.href = "index.html";
+
+    document.getElementById("navUserInfo").textContent = `👤 ${me.username} (ADMIN)`;
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      sessionStorage.removeItem("user");
+      window.location.href = "login.html";
+    });
+
+    // ── Password toggle ──
+    document.getElementById("toggleFPw").addEventListener("click", () => {
+      const pw = document.getElementById("fPassword");
+      pw.type = pw.type === "password" ? "text" : "password";
+    });
+
+    // ── Role helpers ──
+    const roleColors = {
+      admin:     "badge-disbursed",
+      pegawai:   "badge-submitted",
+      ppk:       "badge-approved_ppk",
+      kalapas:   "badge-approved_kalapas",
+      bendahara: "badge-disbursed",
+    };
+    const roleLabels = {
+      admin: "Admin", pegawai: "Pegawai", ppk: "PPK",
+      kalapas: "Kalapas", bendahara: "Bendahara",
+    };
+
+    function escHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+
+    // ════════════════════════════════════════
+    //  USER MANAGEMENT (Supabase)
+    // ════════════════════════════════════════
+
+    async function loadUsers() {
+      const tbody    = document.getElementById("userTableBody");
+      const errorDiv = document.getElementById("tableError");
+      tbody.innerHTML = `<tr><td colspan="4" class="loading-row">Memuat data...</td></tr>`;
+      errorDiv.classList.add("hidden");
+
+      try {
+        // Ambil semua user, exclude password_hash dari display
+        const users = await sbGet("users", "select=id,username,role&order=created_at.asc");
+
+        if (!users.length) {
+          tbody.innerHTML = `<tr><td colspan="4" class="loading-row">Belum ada user.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = "";
+        users.forEach((u, i) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${i + 1}</td>
+            <td><strong>${escHtml(u.username)}</strong></td>
+            <td><span class="badge ${roleColors[u.role] || ''}">${roleLabels[u.role] || u.role}</span></td>
+            <td class="actions-cell">
+              <button class="btn btn-sm btn-secondary" onclick="startEdit('${u.id}','${escHtml(u.username)}','${u.role}')">✏️ Edit</button>
+              <button class="btn btn-sm btn-delete" onclick="deleteUser('${u.id}','${escHtml(u.username)}')">🗑 Hapus</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        errorDiv.textContent = err.message;
+        errorDiv.classList.remove("hidden");
+        tbody.innerHTML = `<tr><td colspan="4" class="loading-row">Gagal memuat data.</td></tr>`;
+      }
+    }
+
+    document.getElementById("saveUserBtn").addEventListener("click", async () => {
+      const errorDiv   = document.getElementById("formError");
+      const successDiv = document.getElementById("formSuccess");
+      const btn        = document.getElementById("saveUserBtn");
+      const editId     = document.getElementById("editUserId").value;
+
+      errorDiv.classList.add("hidden");
+      successDiv.classList.add("hidden");
+
+      const username = document.getElementById("fUsername").value.trim();
+      const password = document.getElementById("fPassword").value;
+      const role     = document.getElementById("fRole").value;
+
+      if (!username)     return showUserError("Username wajib diisi.");
+      if (!editId && !password) return showUserError("Password wajib diisi untuk user baru.");
+      if (password && password.length < 6) return showUserError("Password minimal 6 karakter.");
+      if (!role)         return showUserError("Pilih role terlebih dahulu.");
+
+      btn.disabled = true;
+      btn.textContent = "Menyimpan...";
+
+      try {
+        if (editId) {
+          // Edit: bangun body dinamis
+          const body = { username, role };
+          if (password) {
+            body.password_hash = await sha256(password);
+          }
+          await sbPatch("users", editId, body);
+          successDiv.textContent = "✅ User berhasil diperbarui!";
+        } else {
+          // Tambah baru
+          const hash = await sha256(password);
+          await sbPost("users", { username, password_hash: hash, role });
+          successDiv.textContent = "✅ User berhasil ditambahkan!";
+        }
+        successDiv.classList.remove("hidden");
+        resetUserForm();
+        loadUsers();
+      } catch (err) {
+        showUserError(err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Simpan";
+      }
+    });
+
+    function showUserError(msg) {
+      const el = document.getElementById("formError");
+      el.textContent = msg; el.classList.remove("hidden");
+    }
+
+    function startEdit(id, username, role) {
+      document.getElementById("editUserId").value      = id;
+      document.getElementById("fUsername").value       = username;
+      document.getElementById("fPassword").value       = "";
+      document.getElementById("fRole").value           = role;
+      document.getElementById("formTitle").textContent = "✏️ Edit User";
+      document.getElementById("pwHint").style.display  = "inline";
+      document.getElementById("cancelEditBtn").classList.remove("hidden");
+      document.getElementById("formError").classList.add("hidden");
+      document.getElementById("formSuccess").classList.add("hidden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    document.getElementById("cancelEditBtn").addEventListener("click", resetUserForm);
+
+    function resetUserForm() {
+      document.getElementById("editUserId").value      = "";
+      document.getElementById("fUsername").value       = "";
+      document.getElementById("fPassword").value       = "";
+      document.getElementById("fRole").value           = "";
+      document.getElementById("formTitle").textContent = "➕ Tambah User Baru";
+      document.getElementById("cancelEditBtn").classList.add("hidden");
+      document.getElementById("formError").classList.add("hidden");
+      document.getElementById("formSuccess").classList.add("hidden");
+    }
+
+    async function deleteUser(id, username) {
+      // Cegah hapus satu-satunya admin
+      const users = await sbGet("users", "select=id,role&role=eq.admin");
+      if (users.length <= 1) {
+        const target = await sbGet("users", `select=role&id=eq.${id}`);
+        if (target[0]?.role === "admin") {
+          alert("Tidak bisa menghapus satu-satunya akun admin.");
+          return;
+        }
+      }
+      if (!confirm(`Hapus user "${username}"? Tindakan ini tidak bisa dibatalkan.`)) return;
+      try {
+        await sbDelete("users", id);
+        loadUsers();
+      } catch (err) { alert("Error: " + err.message); }
+    }
+
+    document.getElementById("refreshUsersBtn").addEventListener("click", loadUsers);
+
+    // ════════════════════════════════════════
+    //  PEGAWAI MANAGEMENT (Supabase)
+    // ════════════════════════════════════════
+
+    async function loadPegawai(q = "") {
+      const tbody    = document.getElementById("pegawaiTableBody");
+      const errorDiv = document.getElementById("pegawaiTableError");
+      tbody.innerHTML = `<tr><td colspan="4" class="loading-row">Memuat data...</td></tr>`;
+      errorDiv.classList.add("hidden");
+
+      try {
+        let query = "select=id,nama,nip&order=nama.asc";
+        if (q) {
+          // Supabase: filter OR dengan ilike
+          query += `&or=(nama.ilike.*${encodeURIComponent(q)}*,nip.ilike.*${encodeURIComponent(q)}*)`;
+        }
+        const list = await sbGet("pegawai", query);
+
+        if (!list.length) {
+          tbody.innerHTML = `<tr><td colspan="4" class="loading-row">${q ? "Pegawai tidak ditemukan." : "Belum ada pegawai."}</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = "";
+        list.forEach((p, i) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${i + 1}</td>
+            <td><strong>${escHtml(p.nama)}</strong></td>
+            <td style="font-family:var(--font-mono);font-size:13px;">${escHtml(p.nip)}</td>
+            <td class="actions-cell">
+              <button class="btn btn-sm btn-secondary" onclick="startEditPegawai('${p.id}','${escHtml(p.nama)}','${escHtml(p.nip)}')">✏️ Edit</button>
+              <button class="btn btn-sm btn-delete" onclick="deletePegawai('${p.id}','${escHtml(p.nama)}')">🗑 Hapus</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        errorDiv.textContent = err.message;
+        errorDiv.classList.remove("hidden");
+        tbody.innerHTML = `<tr><td colspan="4" class="loading-row">Gagal memuat data.</td></tr>`;
+      }
+    }
+
+    let searchTimer;
+    document.getElementById("pegawaiSearchAdmin").addEventListener("input", function () {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => loadPegawai(this.value.trim()), 300);
+    });
+
+    document.getElementById("savePegawaiBtn").addEventListener("click", async () => {
+      const errorDiv   = document.getElementById("pegawaiFormError");
+      const successDiv = document.getElementById("pegawaiFormSuccess");
+      const btn        = document.getElementById("savePegawaiBtn");
+      const editId     = document.getElementById("editPegawaiId").value;
+
+      errorDiv.classList.add("hidden");
+      successDiv.classList.add("hidden");
+
+      const nama = document.getElementById("fNama").value.trim();
+      const nip  = document.getElementById("fNip").value.trim();
+
+      if (!nama) return showPegawaiError("Nama wajib diisi.");
+      if (!nip)  return showPegawaiError("NIP wajib diisi.");
+
+      btn.disabled = true;
+      btn.textContent = "Menyimpan...";
+
+      try {
+        if (editId) {
+          await sbPatch("pegawai", editId, { nama, nip });
+          successDiv.textContent = "✅ Pegawai berhasil diperbarui!";
+        } else {
+          await sbPost("pegawai", { nama, nip });
+          successDiv.textContent = "✅ Pegawai berhasil ditambahkan!";
+        }
+        successDiv.classList.remove("hidden");
+        resetPegawaiForm();
+        loadPegawai(document.getElementById("pegawaiSearchAdmin").value.trim());
+      } catch (err) {
+        showPegawaiError(err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Simpan Pegawai";
+      }
+    });
+
+    function showPegawaiError(msg) {
+      const el = document.getElementById("pegawaiFormError");
+      el.textContent = msg; el.classList.remove("hidden");
+    }
+
+    function startEditPegawai(id, nama, nip) {
+      document.getElementById("editPegawaiId").value          = id;
+      document.getElementById("fNama").value                  = nama;
+      document.getElementById("fNip").value                   = nip;
+      document.getElementById("pegawaiFormTitle").textContent = "✏️ Edit Pegawai";
+      document.getElementById("cancelEditPegawaiBtn").classList.remove("hidden");
+      document.getElementById("pegawaiFormError").classList.add("hidden");
+      document.getElementById("pegawaiFormSuccess").classList.add("hidden");
+      document.getElementById("pegawaiFormTitle").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    document.getElementById("cancelEditPegawaiBtn").addEventListener("click", resetPegawaiForm);
+
+    function resetPegawaiForm() {
+      document.getElementById("editPegawaiId").value          = "";
+      document.getElementById("fNama").value                  = "";
+      document.getElementById("fNip").value                   = "";
+      document.getElementById("pegawaiFormTitle").textContent = "🪪 Tambah Pegawai";
+      document.getElementById("cancelEditPegawaiBtn").classList.add("hidden");
+      document.getElementById("pegawaiFormError").classList.add("hidden");
+      document.getElementById("pegawaiFormSuccess").classList.add("hidden");
+    }
+
+    async function deletePegawai(id, nama) {
+      if (!confirm(`Hapus pegawai "${nama}"? Tindakan ini tidak bisa dibatalkan.`)) return;
+      try {
+        await sbDelete("pegawai", id);
+        loadPegawai(document.getElementById("pegawaiSearchAdmin").value.trim());
+      } catch (err) { alert("Error: " + err.message); }
+    }
+
+    document.getElementById("refreshPegawaiBtn").addEventListener("click", () => {
+      loadPegawai(document.getElementById("pegawaiSearchAdmin").value.trim());
+    });
+
+    // ── Init ──
+    loadUsers();
+    loadPegawai();
+  </script>
+</body>
+</html>

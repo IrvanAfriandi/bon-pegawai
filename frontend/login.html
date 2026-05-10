@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login – Bon Request System</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="login-page">
+
+  <div class="login-wrapper">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="login-icon">📋</div>
+        <h1>Bon Request System</h1>
+        <p>Silakan masuk untuk melanjutkan</p>
+      </div>
+
+      <form id="loginForm" class="login-form">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" placeholder="Masukkan username" autocomplete="off" required />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="password-wrap">
+            <input type="password" id="password" placeholder="Masukkan password" required />
+            <button type="button" class="toggle-pw" id="togglePw" title="Tampilkan password">👁</button>
+          </div>
+        </div>
+
+        <div id="loginError" class="error-msg hidden"></div>
+
+        <button type="submit" class="btn btn-primary btn-full" id="loginBtn">Masuk</button>
+      </form>
+
+      <div class="login-footer">
+        <p>Sistem Pengajuan Bon Internal &mdash; Lapas</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SUPA_URL = "https://pustxqgkxatslwjjmiti.supabase.co";
+    const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1c3R4cWdreGF0c2x3amptaXRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzMTA1OTUsImV4cCI6MjA5Mzg4NjU5NX0.9FcVc7yNXhFptZ1TC7Cdd9Ov8P1t8AVSywzcgF2yntQ";
+
+    const headers = { "Content-Type": "application/json", "apikey": SUPA_KEY, "Authorization": `Bearer ${SUPA_KEY}` };
+
+    // Sudah login → langsung redirect
+    if (sessionStorage.getItem("user")) window.location.href = "index.html";
+
+    document.getElementById("togglePw").addEventListener("click", () => {
+      const pw = document.getElementById("password");
+      pw.type = pw.type === "password" ? "text" : "password";
+    });
+
+    // Hash SHA-256 sederhana untuk verifikasi password
+    async function sha256(message) {
+      const msgBuffer = new TextEncoder().encode(message);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
+      const hashArray  = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const errorDiv = document.getElementById("loginError");
+      const btn      = document.getElementById("loginBtn");
+      errorDiv.classList.add("hidden");
+      btn.disabled = true;
+      btn.textContent = "Memproses...";
+
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value;
+
+      try {
+        // Cari user berdasarkan username
+        const res  = await fetch(
+          `${SUPA_URL}/rest/v1/users?username=eq.${encodeURIComponent(username)}&select=*`,
+          { headers }
+        );
+        const data = await res.json();
+
+        if (!data.length) throw new Error("Username atau password salah.");
+
+        const user = data[0];
+
+        // Verifikasi password: coba plain text dulu (seed awal), lalu SHA-256
+        const hash = await sha256(password);
+        const valid = (user.password_hash === password) || (user.password_hash === hash);
+        if (!valid) throw new Error("Username atau password salah.");
+
+        // Simpan session
+        sessionStorage.setItem("user", JSON.stringify({
+          id: user.id, username: user.username, role: user.role
+        }));
+
+        window.location.href = user.role === "admin" ? "admin.html" : "index.html";
+      } catch (err) {
+        errorDiv.textContent = err.message;
+        errorDiv.classList.remove("hidden");
+        btn.disabled = false;
+        btn.textContent = "Masuk";
+      }
+    });
+  </script>
+</body>
+</html>
