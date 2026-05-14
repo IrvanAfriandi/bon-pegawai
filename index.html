@@ -3,325 +3,811 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard – Bon Request System</title>
+  <title>Sistem Pengajuan Bon - LAPAS</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 
   <!-- ── Navbar ── -->
-  <nav class="navbar">
-    <div class="nav-brand">
-      <span class="nav-icon">📋</span>
-      <span>Bon Request System</span>
+  <nav class="navbar-fixed">
+    <div class="navbar-inner">
+      <a href="index.html" class="navbar-brand">
+        <img src="asset/logo.png" alt="LAPAS Logo" class="navbar-logo" />
+        <span class="navbar-brand-text">LAPAS</span>
+      </a>
+
+      <ul class="navbar-menu">
+        <li><a href="#dashboard" class="nav-link active">Dashboard</a></li>
+        <li><a href="#cara-kerja" class="nav-link">Alur</a></li>
+        <li><a href="#form-pengajuan" class="nav-link">Pengajuan</a></li>
+        <li><a href="#lacak-status" class="nav-link">Lacak Pengajuan</a></li>
+      </ul>
+
+      <a href="login.html" class="navbar-login-btn">Login</a>
+
+      <button class="navbar-hamburger" id="hamburger" aria-label="Menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
     </div>
-    <div class="nav-user">
-      <span id="navUserInfo"></span>
-      <button class="btn btn-outline btn-sm" id="logoutBtn">Keluar</button>
+
+    <!-- Mobile Nav -->
+    <div class="mobile-nav" id="mobileNav">
+      <a href="#dashboard" class="mobile-nav-link active">Dashboard</a>
+      <a href="#cara-kerja" class="mobile-nav-link">Alur</a>
+      <a href="#form-pengajuan" class="mobile-nav-link">Pengajuan</a>
+      <a href="#lacak-status" class="mobile-nav-link">Lacak Pengajuan</a>
+      <a href="login.html" class="mobile-nav-link mobile-login">Login</a>
     </div>
   </nav>
 
-  <div class="container">
-
-    <!-- ── Create Bon Form (pegawai only) ── -->
-    <section class="card" id="createSection">
-      <div class="card-header">
-        <h2>📝 Buat Pengajuan Bon Baru</h2>
+  <!-- ── Hero Section ── -->
+  <section class="hero-section" id="dashboard">
+    <div class="hero-container">
+      <!-- Left Content -->
+      <div class="hero-content">
+        <div class="hero-heading">
+          <span class="hero-heading-line">SISTEM</span>
+          <span class="hero-heading-line">PENGAJUAN</span>
+          <span class="hero-heading-line">BON</span>
+        </div>
+        <p class="hero-subheading">
+          Ajukan kebutuhan operasional dengan mudah dan transparan. Tanpa login — cukup gunakan identitas Anda.
+        </p>
+        <div class="hero-buttons">
+          <a href="#form-pengajuan" class="btn-hero-primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            Ajukan Sekarang
+          </a>
+          <a href="#lacak-status" class="btn-hero-outline">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            Lacak Status
+          </a>
+        </div>
       </div>
-      <div class="card-body">
 
-        <!-- Custom Combobox Pemohon -->
-        <div class="form-group">
-          <label>Nama Pemohon</label>
-          <div class="combobox-wrap" id="comboboxWrap">
-            <input
-              type="text"
-              id="pegawaiSearch"
-              class="combobox-input"
-              placeholder="Ketik nama atau NIP..."
-              autocomplete="off"
-              readonly
-            />
-            <span class="combobox-arrow" id="comboboxArrow">▾</span>
-            <div class="combobox-dropdown hidden" id="comboboxDropdown">
-              <div class="combobox-search-wrap">
-                <input
-                  type="text"
-                  id="comboboxSearchInput"
-                  class="combobox-search"
-                  placeholder="🔍 Cari nama atau NIP..."
-                  autocomplete="off"
-                />
-              </div>
-              <ul class="combobox-list" id="comboboxList"></ul>
-            </div>
+      <!-- Right Visual - LAPAS Building -->
+      <div class="hero-visual">
+        <div class="hero-image-wrapper">
+          <div class="hero-image-frame">
+            <img src="asset/bg.jpeg" alt="Gedung LAPAS" class="hero-image" />
+            <!-- Navy accent overlay -->
+            <div class="hero-image-overlay"></div>
           </div>
-          <input type="hidden" id="applicantSelectId" />
-          <input type="hidden" id="applicantSelectNama" />
-          <input type="hidden" id="applicantSelectNip" />
-          <div id="selectedPegawaiInfo" class="selected-pegawai-info hidden">
-            <span class="info-label">NIP:</span>
-            <span id="selectedNip" class="info-value">–</span>
+          <!-- Geometric accents -->
+          <div class="hero-image-accent-top"></div>
+          <div class="hero-image-accent-bottom"></div>
+          <!-- Corner decoration -->
+          <div class="hero-corner-deco"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Decorative shapes -->
+    <div class="hero-shape hero-shape-1"></div>
+    <div class="hero-shape hero-shape-2"></div>
+  </section>
+
+  <!-- ── Alur Section ── -->
+  <section class="alur-section" id="cara-kerja">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Alur Pengajuan Bon</h2>
+        <p class="section-desc">Ajukan bon dalam 4 langkah mudah tanpa perlu membuat akun</p>
+      </div>
+
+      <div class="alur-grid">
+        <div class="alur-card">
+          <div class="alur-number">01</div>
+          <div class="alur-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
           </div>
+          <h3 class="alur-title">Isi Identitas</h3>
+          <p class="alur-desc">Masukkan nama lengkap dan NIP Anda</p>
         </div>
 
-        <div class="items-section">
+        <div class="alur-arrow">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </div>
+
+        <div class="alur-card">
+          <div class="alur-number">02</div>
+          <div class="alur-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+          </div>
+          <h3 class="alur-title">Ajukan Rincian</h3>
+          <p class="alur-desc">Tuliskan item kebutuhan dan jumlah dana</p>
+        </div>
+
+        <div class="alur-arrow">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </div>
+
+        <div class="alur-card">
+          <div class="alur-number">03</div>
+          <div class="alur-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+          </div>
+          <h3 class="alur-title">Proses Persetujuan</h3>
+          <p class="alur-desc">Diproses oleh PPK dan Kalapas</p>
+        </div>
+
+        <div class="alur-arrow">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </div>
+
+        <div class="alur-card">
+          <div class="alur-number">04</div>
+          <div class="alur-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><path d="M7 15h0M2 9h20"></path></svg>
+          </div>
+          <h3 class="alur-title">Cairkan Dana</h3>
+          <p class="alur-desc">Dana dicairkan dan LPJ diunggah</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Form Section ── -->
+  <section class="form-section" id="form-pengajuan">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Formulir Pengajuan Bon</h2>
+        <p class="section-desc">Isi data di bawah ini untuk mengajukan bon baru</p>
+      </div>
+
+      <div class="form-card">
+        <form id="bonForm">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Nama Pegawai</label>
+              <div class="form-autocomplete">
+                <input type="text" id="namaSearch" class="form-input" placeholder="Ketik nama atau NIP untuk mencari..." autocomplete="off" />
+                <div class="autocomplete-dropdown" id="namaDropdown"></div>
+                <input type="hidden" id="nama" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">NIP (Nomor Induk Pegawai)</label>
+              <input type="text" id="nip" class="form-input" placeholder="Otomatis terisi" readonly />
+            </div>
+          </div>
+
           <div class="items-header">
-            <label>Rincian Item</label>
-            <button class="btn btn-sm btn-secondary" id="addItemBtn">+ Tambah Item</button>
+            <label class="items-label">Rincian Kebutuhan</label>
+            <button type="button" class="btn-add-item" id="addItemBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Tambah Item
+            </button>
           </div>
-          <div id="itemsContainer"></div>
-        </div>
 
-        <div class="total-row">
-          <span>Total:</span>
-          <span id="totalDisplay" class="total-amount">Rp 0</span>
-        </div>
+          <div class="items-list" id="itemsContainer"></div>
 
-        <div id="createError"   class="error-msg hidden"></div>
-        <div id="createSuccess" class="success-msg hidden"></div>
-
-        <button class="btn btn-primary" id="submitBonBtn">Ajukan Bon</button>
-      </div>
-    </section>
-
-    <!-- ── LPJ Modal ── -->
-    <div class="modal-overlay hidden" id="lpjModal">
-      <div class="modal">
-        <div class="modal-header">
-          <h3>📄 Upload LPJ</h3>
-          <button class="modal-close" id="closeLpjModal">&times;</button>
-        </div>
-        <div class="modal-body">
-          <input type="hidden" id="lpjBonId" />
-          <div class="form-group">
-            <label>Deskripsi LPJ</label>
-            <textarea id="lpjDescription" rows="4" placeholder="Tuliskan keterangan pertanggungjawaban..."></textarea>
+          <div class="total-bar">
+            <span class="total-label">Total Pengajuan</span>
+            <span class="total-value" id="totalDisplay">Rp 0</span>
           </div>
-          <div class="form-group">
-            <label>File LPJ</label>
-            <div class="file-upload-area" id="fileUploadArea">
-              <input type="file" id="lpjFile" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.xlsm,.xlsb,.csv" />
-              <span class="file-hint">📎 Klik atau seret file ke sini (PDF, JPG, PNG, DOC, DOCX, XLS, XLSX, CSV — maks 10MB)</span>
-              <span class="file-name hidden" id="fileName"></span>
-            </div>
+
+          <div id="formError" class="alert-error hidden">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            <span></span>
           </div>
-          <div id="lpjError"   class="error-msg hidden"></div>
-          <div id="lpjSuccess" class="success-msg hidden"></div>
-          <button class="btn btn-primary btn-full" id="submitLpjBtn">Upload LPJ</button>
-        </div>
+          <div id="formSuccess" class="alert-success hidden">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            <span></span>
+          </div>
+
+          <button type="submit" class="btn-submit" id="submitBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            Kirim Pengajuan Bon
+          </button>
+        </form>
       </div>
     </div>
+  </section>
 
-    <!-- ── Edit Bon Modal (pegawai – bon ditolak) ── -->
-    <div class="modal-overlay hidden" id="editBonModal">
-      <div class="modal" style="max-width:620px;">
-        <div class="modal-header">
-          <h3>✏️ Edit & Ajukan Ulang Bon</h3>
-          <button class="modal-close" id="closeEditBonModal">&times;</button>
+  <!-- ── Lacak Section ── -->
+  <section class="lacak-section" id="lacak-status">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Periksa Status Pengajuan</h2>
+        <p class="section-desc">Cari nama atau NIP untuk melihat status pengajuan bon</p>
+      </div>
+
+      <div class="lacak-card">
+        <div class="lacak-search">
+          <div class="track-autocomplete">
+            <input type="text" id="trackSearch" class="lacak-input" placeholder="Ketik nama atau NIP untuk mencari..." autocomplete="off" />
+            <div class="autocomplete-dropdown" id="trackDropdown"></div>
+            <input type="hidden" id="trackNama" />
+            <input type="hidden" id="trackNip" />
+          </div>
+          <button class="lacak-btn" id="trackBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            Cari
+          </button>
         </div>
-        <div class="modal-body">
-          <input type="hidden" id="editBonId" />
 
-          <!-- Info alasan penolakan -->
-          <div id="editRejectionInfo" class="rejection-info-box hidden">
-            <span class="rejection-info-label">❌ Alasan Penolakan:</span>
-            <span id="editRejectionReason"></span>
-          </div>
-
-          <!-- Nama pemohon (readonly, tidak bisa diganti) -->
-          <div class="form-group">
-            <label>Nama Pemohon</label>
-            <input type="text" id="editApplicantName" class="combobox-input" readonly style="background:var(--bg-secondary);cursor:not-allowed;opacity:.7;" />
-            <input type="hidden" id="editApplicantNip" />
-          </div>
-
-          <!-- Rincian item -->
-          <div class="items-section">
-            <div class="items-header">
-              <label>Rincian Item</label>
-              <button class="btn btn-sm btn-secondary" id="editAddItemBtn">+ Tambah Item</button>
-            </div>
-            <div id="editItemsContainer"></div>
-          </div>
-
-          <div class="total-row">
-            <span>Total:</span>
-            <span id="editTotalDisplay" class="total-amount">Rp 0</span>
-          </div>
-
-          <div id="editBonError"   class="error-msg hidden"></div>
-          <div id="editBonSuccess" class="success-msg hidden"></div>
-
-          <button class="btn btn-primary btn-full" id="submitEditBonBtn">🔄 Ajukan Ulang</button>
-        </div>
+        <div id="trackResults" class="lacak-results"></div>
       </div>
     </div>
+  </section>
 
-    <!-- ── Dashboard Bendahara ── -->
-    <section class="card hidden" id="dashboardSection">
-      <div class="card-header">
-        <h2>📊 Ringkasan Transaksi Pengajuan</h2>
-        <button class="btn btn-sm btn-outline" id="refreshDashboardBtn">↻ Refresh</button>
-      </div>
-      <div class="card-body">
-        <div class="dashboard-grid" id="dashboardGrid">
-          <!-- Tab Filter -->
-          <div class="dashboard-tabs" id="dashboardTabs">
-            <button class="dash-tab active" data-filter="all">Semua</button>
-            <button class="dash-tab" data-filter="submitted">Proses PPK</button>
-            <button class="dash-tab" data-filter="approved_ppk">Proses Kalapas</button>
-            <button class="dash-tab" data-filter="approved_kalapas">Menunggu Pencairan</button>
-            <button class="dash-tab" data-filter="disbursed_nolpj">Belum LPJ</button>
-            <button class="dash-tab" data-filter="completed">Sudah LPJ</button>
-            <button class="dash-tab" data-filter="rejected">Ditolak</button>
-          </div>
+  <!-- ── Footer ── -->
+  <footer class="footer">
+    <div class="footer-bottom">
+      <p>&copy; 2026 Sistem Pengajuan Bon - LAPAS. Hak Cipta Dilindungi.</p>
+    </div>
+  </footer>
 
-          <!-- Stat Cards -->
-          <div class="dash-cards">
-            <div class="dash-card dash-card--blue" id="statSubmitted">
-              <div class="dash-card-icon">⏳</div>
-              <div class="dash-card-body">
-                <div class="dash-card-count" id="countSubmitted">–</div>
-                <div class="dash-card-label">Menunggu Persetujuan PPK</div>
-              </div>
-            </div>
-            <div class="dash-card dash-card--green" id="statApprovedPpk">
-              <div class="dash-card-icon">✅</div>
-              <div class="dash-card-body">
-                <div class="dash-card-count" id="countApprovedPpk">–</div>
-                <div class="dash-card-label">Menunggu Persetujuan Kalapas</div>
-              </div>
-            </div>
-            <div class="dash-card dash-card--amber" id="statApprovedKalapas">
-              <div class="dash-card-icon">💰</div>
-              <div class="dash-card-body">
-                <div class="dash-card-count" id="countApprovedKalapas">–</div>
-                <div class="dash-card-label">Menunggu Pencairan Dana</div>
-              </div>
-            </div>
-            <div class="dash-card dash-card--orange" id="statNolpj">
-              <div class="dash-card-icon">📂</div>
-              <div class="dash-card-body">
-                <div class="dash-card-count" id="countNolpj">–</div>
-                <div class="dash-card-label">Belum Upload LPJ</div>
-              </div>
-            </div>
-            <div class="dash-card dash-card--teal" id="statCompleted">
-              <div class="dash-card-icon">📄</div>
-              <div class="dash-card-body">
-                <div class="dash-card-count" id="countCompleted">–</div>
-                <div class="dash-card-label">Sudah Upload LPJ</div>
-              </div>
-            </div>
-            <div class="dash-card dash-card--red" id="statRejected">
-              <div class="dash-card-icon">🚫</div>
-              <div class="dash-card-body">
-                <div class="dash-card-count" id="countRejected">–</div>
-                <div class="dash-card-label">Pengajuan Ditolak</div>
-              </div>
-            </div>
-          </div>
+  <script src="api.js"></script>
+  <script>
+    // ── Helper Functions ────────────────────────────────
+    function formatRupiah(num) {
+      return 'Rp ' + Math.round(num || 0).toLocaleString('id-ID');
+    }
 
-          <!-- List Preview -->
-          <div class="dash-list-wrap">
-            <div class="dash-list-header">
-              <span id="dashListTitle">Semua Pengajuan</span>
-              <span class="dash-list-count" id="dashListCount"></span>
-            </div>
-            <div id="dashListBody" class="dash-list-body">
-              <div class="dash-list-loading">Memuat data...</div>
-            </div>
-          </div>
+    function formatDate(dateStr) {
+      if (!dateStr) return '-';
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    function statusLabel(status) {
+      const labels = {
+        'submitted': 'Menunggu',
+        'approved_ppk': 'Disetujui PPK',
+        'approved_kalapas': 'Disetujui Kalapas',
+        'disbursed': 'Dicairkan',
+        'completed': 'Selesai',
+        'rejected': 'Ditolak'
+      };
+      return labels[status] || status;
+    }
+
+    function escHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str || '';
+      return div.innerHTML;
+    }
+
+    // ── Navbar Active State ──────────────────────────────
+    const hamburger = document.getElementById('hamburger');
+    const mobileNav = document.getElementById('mobileNav');
+
+    function setActiveNav(link) {
+      document.querySelectorAll('.nav-link, .mobile-nav-link').forEach(el => {
+        el.classList.remove('active');
+      });
+      link.classList.add('active');
+    }
+
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', function(e) {
+        const href = this.getAttribute('href');
+        if (href && href.startsWith('#')) {
+          e.preventDefault();
+          if (href === '#dashboard') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          } else {
+            const target = document.querySelector(href);
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }
+      });
+    });
+
+    document.querySelectorAll('.mobile-nav-link').forEach(link => {
+      link.addEventListener('click', function(e) {
+        const href = this.getAttribute('href');
+        // Only prevent default for hash links, let full URLs work
+        if (href && href.startsWith('#')) {
+          e.preventDefault();
+          const targetId = href.substring(1);
+          const target = document.getElementById(targetId);
+          if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        setActiveNav(this);
+        hamburger.classList.remove('active');
+        mobileNav.classList.remove('active');
+      });
+    });
+
+    // Hamburger button
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('active');
+      mobileNav.classList.toggle('active');
+    });
+
+    // ── Scroll Spy ───────────────────────────────────────
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-link[href^="#"]');
+    const mobileLinks = document.querySelectorAll('.mobile-nav-link[href^="#"]');
+
+    function updateActiveNav() {
+      const scrollY = window.scrollY;
+
+      // At the very top, dashboard is active
+      if (scrollY < 100) {
+        navLinks.forEach(l => l.classList.remove('active'));
+        mobileLinks.forEach(l => l.classList.remove('active'));
+        document.querySelectorAll('[href="#dashboard"]').forEach(l => l.classList.add('active'));
+        return;
+      }
+
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop - 100;
+        const sectionHeight = section.offsetHeight;
+        const sectionId = section.getAttribute('id');
+
+        if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
+          navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === '#' + sectionId) {
+              link.classList.add('active');
+            }
+          });
+          mobileLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === '#' + sectionId) {
+              link.classList.add('active');
+            }
+          });
+        }
+      });
+    }
+
+    window.addEventListener('scroll', updateActiveNav);
+    updateActiveNav(); // Run on load
+
+    // ═══════════════════════════════════════
+    //  AUTOCOMPLETE - Nama Pegawai
+    // ═══════════════════════════════════════
+
+    const namaSearch = document.getElementById('namaSearch');
+    const namaDropdown = document.getElementById('namaDropdown');
+    const namaHidden = document.getElementById('nama');
+    const nipInput = document.getElementById('nip');
+
+    let searchTimeout = null;
+    let selectedIndex = -1;
+
+    async function searchPegawai(query) {
+      namaDropdown.innerHTML = '<div class="autocomplete-loading">Memuat...</div>';
+      namaDropdown.classList.add('active');
+
+      try {
+        const results = await apiGet('pegawai/search?q=' + encodeURIComponent(query));
+        renderDropdown(results);
+      } catch (err) {
+        namaDropdown.innerHTML = '<div class="autocomplete-empty">Gagal memuat data</div>';
+      }
+    }
+
+    function renderDropdown(results) {
+      selectedIndex = -1;
+
+      if (!results.length) {
+        namaDropdown.innerHTML = '<div class="autocomplete-empty">Tidak ditemukan</div>';
+        return;
+      }
+
+      namaDropdown.innerHTML = results.map((p, i) => `
+        <div class="autocomplete-item" data-index="${i}" data-id="${p.id}" data-nama="${p.nama}" data-nip="${p.nip}">
+          <div class="autocomplete-item-name">${escHtml(p.nama)}</div>
+          <div class="autocomplete-item-nip">NIP: ${escHtml(p.nip)}</div>
         </div>
-      </div>
-    </section>
+      `).join('');
 
-    <!-- ── Bon Table ── -->
-    <section class="card">
-      <div class="card-header">
-        <h2>📊 Daftar Pengajuan Bon</h2>
-        <button class="btn btn-sm btn-outline" id="refreshBtn">↻ Refresh</button>
-      </div>
-      <div class="card-body">
-        <div id="tableError" class="error-msg hidden"></div>
+      document.querySelectorAll('.autocomplete-item').forEach(item => {
+        item.addEventListener('click', () => selectPegawai(item));
+      });
+    }
 
-        <!-- Tab view: pegawai & bendahara -->
-        <div id="tabView" class="hidden">
+    function selectPegawai(item) {
+      const nama = item.dataset.nama;
+      const nip = item.dataset.nip;
 
-          <!-- ── Filter Bar: Search + Sortir Bulan ── -->
-          <div class="tab-filter-bar">
-            <div class="tab-filter-search-wrap">
-              <span class="tab-filter-icon">🔍</span>
-              <input
-                type="text"
-                id="tabSearchInput"
-                class="tab-filter-search"
-                placeholder="Cari nama atau NIP pemohon..."
-                autocomplete="off"
-              />
-              <button class="tab-filter-clear hidden" id="tabSearchClear" title="Hapus pencarian">✕</button>
-            </div>
-            <div class="tab-filter-month-wrap">
-              <span class="tab-filter-icon">📅</span>
-              <select id="tabMonthFilter" class="tab-filter-select">
-                <option value="">Semua Bulan</option>
-              </select>
-            </div>
-          </div>
+      namaSearch.value = nama;
+      namaHidden.value = nama;
+      nipInput.value = nip;
 
-          <div class="bon-tabs-wrap">
-            <button class="bon-tab active" data-tab="proses">
-              Proses <span class="bon-tab-badge" id="tabCountProses">0</span>
-            </button>
-            <button class="bon-tab" data-tab="pencairan">
-              Menunggu Pencairan <span class="bon-tab-badge bon-tab-badge--amber" id="tabCountPencairan">0</span>
-            </button>
-            <button class="bon-tab" data-tab="lpj">
-              Harus Upload LPJ <span class="bon-tab-badge bon-tab-badge--orange" id="tabCountLpj">0</span>
-            </button>
-            <button class="bon-tab" data-tab="selesai">
-              Selesai <span class="bon-tab-badge bon-tab-badge--green" id="tabCountSelesai">0</span>
-            </button>
-            <button class="bon-tab" data-tab="ditolak">
-              Ditolak <span class="bon-tab-badge bon-tab-badge--red" id="tabCountDitolak">0</span>
-            </button>
-          </div>
-          <div id="tabPanelProses"    class="bon-tab-panel"></div>
-          <div id="tabPanelPencairan" class="bon-tab-panel hidden"></div>
-          <div id="tabPanelLpj"       class="bon-tab-panel hidden"></div>
-          <div id="tabPanelSelesai"   class="bon-tab-panel hidden"></div>
-          <div id="tabPanelDitolak"   class="bon-tab-panel hidden"></div>
+      namaDropdown.classList.remove('active');
+    }
+
+    namaSearch.addEventListener('input', function() {
+      const query = this.value.trim();
+
+      clearTimeout(searchTimeout);
+
+      if (!query) {
+        namaDropdown.classList.remove('active');
+        namaHidden.value = '';
+        nipInput.value = '';
+        return;
+      }
+
+      searchTimeout = setTimeout(() => searchPegawai(query), 300);
+    });
+
+    namaSearch.addEventListener('focus', function() {
+      if (this.value.trim()) {
+        searchPegawai(this.value.trim());
+      }
+    });
+
+    namaSearch.addEventListener('keydown', function(e) {
+      const items = document.querySelectorAll('.autocomplete-item');
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+        updateSelection(items);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        selectedIndex = Math.max(selectedIndex - 1, -1);
+        updateSelection(items);
+      } else if (e.key === 'Enter' && selectedIndex >= 0) {
+        e.preventDefault();
+        const selected = items[selectedIndex];
+        if (selected) selectPegawai(selected);
+      } else if (e.key === 'Escape') {
+        namaDropdown.classList.remove('active');
+      }
+    });
+
+    function updateSelection(items) {
+      items.forEach((item, i) => {
+        item.classList.toggle('selected', i === selectedIndex);
+      });
+
+      if (selectedIndex >= 0 && items[selectedIndex]) {
+        items[selectedIndex].scrollIntoView({ block: 'nearest' });
+      }
+    }
+
+    document.addEventListener('click', function(e) {
+      if (!namaSearch.contains(e.target) && !namaDropdown.contains(e.target)) {
+        namaDropdown.classList.remove('active');
+      }
+    });
+
+    // ═══════════════════════════════════════
+    //  ITEMS MANAGEMENT
+    // ═══════════════════════════════════════
+
+    let itemCount = 0;
+
+    function addItem() {
+      itemCount++;
+      const idx = itemCount;
+      const container = document.getElementById('itemsContainer');
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      row.dataset.idx = idx;
+      row.innerHTML = `
+        <input type="text" placeholder="Nama item" class="form-input" data-idx="${idx}" />
+        <input type="text" placeholder="Keperluan" class="form-input" data-idx="${idx}" />
+        <input type="text" placeholder="Rp" class="form-input amount-input" data-idx="${idx}" />
+        <button type="button" class="item-remove" onclick="removeItem(${idx})" title="Hapus">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      `;
+      container.appendChild(row);
+
+      // Amount formatting
+      const amountInput = row.querySelector('.amount-input');
+      amountInput.addEventListener('input', function(e) {
+        formatRupiahInput(this);
+        recalcTotal();
+      });
+      amountInput.addEventListener('blur', function() {
+        if (this.value) {
+          const num = parseInt(this.value.replace(/\D/g, '')) || 0;
+          this.value = num.toLocaleString('id-ID');
+        }
+      });
+    }
+
+    function formatRupiahInput(input) {
+      let value = input.value.replace(/\D/g, '');
+      input.value = value ? parseInt(value).toLocaleString('id-ID') : '';
+    }
+
+    function removeItem(idx) {
+      const row = document.querySelector(`.item-row[data-idx="${idx}"]`);
+      if (row) { row.remove(); recalcTotal(); }
+    }
+
+    function recalcTotal() {
+      const amounts = [...document.querySelectorAll('.amount-input')]
+        .map(el => parseInt(el.value.replace(/\D/g, '')) || 0);
+      document.getElementById('totalDisplay').textContent =
+        formatRupiah(amounts.reduce((a, b) => a + b, 0));
+    }
+
+    function getItems() {
+      return [...document.querySelectorAll('#itemsContainer .item-row')].map(row => {
+        const inputs = row.querySelectorAll('input');
+        return {
+          name:    inputs[0].value.trim(),
+          purpose: inputs[1].value.trim(),
+          amount:  parseInt(inputs[2].value.replace(/\D/g, '')) || 0,
+        };
+      });
+    }
+
+    document.getElementById('addItemBtn').addEventListener('click', addItem);
+    addItem();
+
+    // ── Submit Bon ──────────────────────────
+    document.getElementById('bonForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const errorDiv = document.getElementById('formError');
+      const successDiv = document.getElementById('formSuccess');
+      const btn = document.getElementById('submitBtn');
+
+      errorDiv.classList.add('hidden');
+      successDiv.classList.add('hidden');
+
+      const nama = document.getElementById('nama').value.trim();
+      const nip = document.getElementById('nip').value.trim();
+
+      if (!nama) {
+        errorDiv.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><span>Nama wajib diisi.</span>`;
+        errorDiv.classList.remove('hidden');
+        return;
+      }
+      if (!nip) {
+        errorDiv.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><span>NIP wajib diisi.</span>`;
+        errorDiv.classList.remove('hidden');
+        return;
+      }
+
+      const items = getItems();
+      if (!items.length || items.every(i => !i.name && !i.amount && !i.purpose)) {
+        errorDiv.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><span>Minimal satu item kebutuhan wajib diisi.</span>`;
+        errorDiv.classList.remove('hidden');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = `<svg class="spinner" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"></path></svg> Mengirim...`;
+
+      try {
+        await apiPost('bon/create', { applicantName: nama, applicantNip: nip, items });
+        successDiv.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>Pengajuan bon berhasil dikirim! Catat NIP Anda untuk melacak status.</span>`;
+        successDiv.classList.remove('hidden');
+
+        document.getElementById('namaSearch').value = '';
+        document.getElementById('nama').value = '';
+        document.getElementById('nip').value = '';
+        document.getElementById('itemsContainer').innerHTML = '';
+        itemCount = 0;
+        addItem();
+        recalcTotal();
+
+        setTimeout(() => successDiv.classList.add('hidden'), 8000);
+      } catch (err) {
+        errorDiv.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><span>${err.message}</span>`;
+        errorDiv.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg> Kirim Pengajuan Bon`;
+      }
+    });
+
+    // ═══════════════════════════════════════
+    //  TRACK STATUS - Autocomplete
+    // ═══════════════════════════════════════
+
+    const trackSearch = document.getElementById('trackSearch');
+    const trackDropdown = document.getElementById('trackDropdown');
+    const trackNama = document.getElementById('trackNama');
+    const trackNip = document.getElementById('trackNip');
+    const trackBtn = document.getElementById('trackBtn');
+    const trackResults = document.getElementById('trackResults');
+
+    let trackSearchTimeout = null;
+    let trackSelectedIndex = -1;
+
+    async function searchTrackPegawai(query) {
+      trackDropdown.innerHTML = '<div class="autocomplete-loading">Memuat...</div>';
+      trackDropdown.classList.add('active');
+
+      try {
+        const results = await apiGet('pegawai/search?q=' + encodeURIComponent(query));
+        renderTrackDropdown(results);
+      } catch (err) {
+        trackDropdown.innerHTML = '<div class="autocomplete-empty">Gagal memuat data</div>';
+      }
+    }
+
+    function renderTrackDropdown(results) {
+      trackSelectedIndex = -1;
+
+      if (!results.length) {
+        trackDropdown.innerHTML = '<div class="autocomplete-empty">Tidak ditemukan</div>';
+        return;
+      }
+
+      trackDropdown.innerHTML = results.map((p, i) => `
+        <div class="autocomplete-item" data-index="${i}" data-id="${p.id}" data-nama="${p.nama}" data-nip="${p.nip}">
+          <div class="autocomplete-item-name">${escHtml(p.nama)}</div>
+          <div class="autocomplete-item-nip">NIP: ${escHtml(p.nip)}</div>
         </div>
+      `).join('');
 
-        <!-- Table view: ppk, kalapas, dan role lain -->
-        <div id="tableView">
-          <div class="table-wrapper">
-            <table class="bon-table" id="bonTable">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Nama Pemohon</th>
-                  <th>Total</th>
-                  <th>Status</th>
-                  <th>LPJ</th>
-                  <th>Tanggal</th>
-                  <th>Aksi</th>
-                </tr>
-              </thead>
-              <tbody id="bonTableBody">
-                <tr><td colspan="7" class="loading-row">Memuat data...</td></tr>
-              </tbody>
-            </table>
+      document.querySelectorAll('#trackDropdown .autocomplete-item').forEach(item => {
+        item.addEventListener('click', () => selectTrackPegawai(item));
+      });
+    }
+
+    function selectTrackPegawai(item) {
+      const nama = item.dataset.nama;
+      const nip = item.dataset.nip;
+
+      trackSearch.value = nama;
+      trackNama.value = nama;
+      trackNip.value = nip;
+
+      trackDropdown.classList.remove('active');
+    }
+
+    trackSearch.addEventListener('input', function() {
+      const query = this.value.trim();
+
+      clearTimeout(trackSearchTimeout);
+
+      if (!query) {
+        trackDropdown.classList.remove('active');
+        trackNama.value = '';
+        trackNip.value = '';
+        return;
+      }
+
+      trackSearchTimeout = setTimeout(() => searchTrackPegawai(query), 300);
+    });
+
+    trackSearch.addEventListener('focus', function() {
+      if (this.value.trim()) {
+        searchTrackPegawai(this.value.trim());
+      }
+    });
+
+    trackSearch.addEventListener('keydown', function(e) {
+      const items = document.querySelectorAll('#trackDropdown .autocomplete-item');
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        trackSelectedIndex = Math.min(trackSelectedIndex + 1, items.length - 1);
+        updateTrackSelection(items);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        trackSelectedIndex = Math.max(trackSelectedIndex - 1, -1);
+        updateTrackSelection(items);
+      } else if (e.key === 'Enter' && trackSelectedIndex >= 0) {
+        e.preventDefault();
+        const selected = items[trackSelectedIndex];
+        if (selected) selectTrackPegawai(selected);
+      } else if (e.key === 'Escape') {
+        trackDropdown.classList.remove('active');
+      }
+    });
+
+    function updateTrackSelection(items) {
+      items.forEach((item, i) => {
+        item.classList.toggle('selected', i === trackSelectedIndex);
+      });
+
+      if (trackSelectedIndex >= 0 && items[trackSelectedIndex]) {
+        items[trackSelectedIndex].scrollIntoView({ block: 'nearest' });
+      }
+    }
+
+    document.addEventListener('click', function(e) {
+      if (!trackSearch.contains(e.target) && !trackDropdown.contains(e.target)) {
+        trackDropdown.classList.remove('active');
+      }
+    });
+
+    // Track search button
+    trackBtn.addEventListener('click', async () => {
+      const nama = trackNama.value.trim();
+      const nip = trackNip.value.trim();
+
+      if (!nip) {
+        trackResults.innerHTML = `<div class="lacak-empty"><p>Pilih nama pegawai dari dropdown untuk mencari.</p></div>`;
+        return;
+      }
+
+      trackResults.innerHTML = `<div class="lacak-loading"><p>Memuat data...</p></div>`;
+
+      try {
+        const bons = await apiGet('bon/get');
+        const filtered = bons.filter(b => b.applicant_nip === nip);
+
+        if (!filtered.length) {
+          trackResults.innerHTML = `<div class="lacak-empty">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <p>Tidak ada pengajuan untuk ${escHtml(nama)} (${escHtml(nip)}).</p>
+          </div>`;
+          return;
+        }
+
+        trackResults.innerHTML = `<div class="lacak-list">${filtered.map((b, idx) => `
+          <div class="lacak-item" data-bon-id="${b.id}">
+            <div class="lacak-item-header" onclick="toggleBonDetail(${idx})" style="cursor: pointer;">
+              <div class="lacak-item-info">
+                <strong>${escHtml(b.applicant_name)}</strong>
+                <span>${formatDate(b.created_at)}</span>
+              </div>
+              <div class="lacak-item-actions">
+                <span class="lacak-badge lacak-badge-${b.status === 'approved_ppk' ? 'approved' : b.status === 'approved_kalapas' ? 'approved' : b.status}">${statusLabel(b.status)}</span>
+                <span class="lacak-toggle" id="toggle-${idx}">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </span>
+              </div>
+            </div>
+            <div class="lacak-item-amount">
+              <span>Total:</span>
+              <strong>${formatRupiah(b.total_amount)}</strong>
+            </div>
+            <div class="lacak-item-detail" id="detail-${idx}" style="display: none;">
+              <div class="lacak-item-detail-header">Rincian Item</div>
+              ${b.items && b.items.length ? b.items.map(item => `
+                <div class="lacak-item-row">
+                  <div class="lacak-item-name">${escHtml(item.name)}</div>
+                  <div class="lacak-item-purpose">${escHtml(item.purpose)}</div>
+                  <div class="lacak-item-amount-value">${formatRupiah(item.amount)}</div>
+                </div>
+              `).join('') : '<div class="lacak-item-empty">Tidak ada item</div>'}
+            </div>
+            ${b.rejection_reason ? `<div class="lacak-item-reason">Alasan: ${escHtml(b.rejection_reason)}</div>` : ''}
           </div>
-        </div>
-      </div>
-    </section>
+        `).join('')}</div>`;
 
-  </div>
+      } catch (err) {
+        trackResults.innerHTML = `<div class="lacak-empty"><p>Gagal memuat data. Silakan coba lagi.</p></div>`;
+      }
+    });
 
-  <!-- supabase.js HARUS di-load sebelum script.js -->
-  <script src="supabase.js"></script>
-  <script src="script.js"></script>
+    // Toggle bon detail
+    window.toggleBonDetail = function(idx) {
+      const detail = document.getElementById('detail-' + idx);
+      const toggle = document.getElementById('toggle-' + idx);
+
+      if (detail.style.display === 'none') {
+        detail.style.display = 'block';
+        toggle.style.transform = 'rotate(180deg)';
+      } else {
+        detail.style.display = 'none';
+        toggle.style.transform = 'rotate(0deg)';
+      }
+    };
+
+    // Smooth scroll - only for hash links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+
+    // Debug: Log all link clicks
+    document.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', function(e) {
+        console.log('Link clicked:', this.href, 'hash:', this.hash);
+      });
+    });
+  </script>
 </body>
 </html>

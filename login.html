@@ -3,107 +3,522 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login – Bon Request System</title>
+  <title>Login Admin - Sistem Pengajuan Bon</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body class="login-page">
+<body>
 
-  <div class="login-wrapper">
-    <div class="login-card">
-      <div class="login-header">
-        <div class="login-icon">📋</div>
-        <h1>Bon Request System</h1>
-        <p>Silakan masuk untuk melanjutkan</p>
+  <!-- ── Login Page ── -->
+  <section class="login-page-v2">
+    <!-- Background Image with Overlay -->
+    <div class="login-bg">
+      <img src="asset/bg.jpeg" alt="Background" class="login-bg-img" />
+      <div class="login-bg-overlay"></div>
+    </div>
+
+    <!-- Content -->
+    <div class="login-content">
+      <!-- Logo & Branding -->
+      <div class="login-brand-top">
+        <div class="login-logo-large">
+          <img src="asset/logo.png" alt="LAPAS" />
+        </div>
+        <h1 class="login-title-large">LAPAS</h1>
+        <p class="login-subtitle-large">Lembaga Pemasyarakatan</p>
       </div>
 
-      <form id="loginForm" class="login-form">
-        <div class="form-group">
-          <label for="username">Username</label>
-          <input type="text" id="username" placeholder="Masukkan username" autocomplete="off" required />
+      <!-- Login Card -->
+      <div class="login-card-v2">
+        <div class="login-card-header">
+          <h2 class="login-card-title">Selamat Datang</h2>
+          <p class="login-card-desc">Masuk untuk mengelola pengajuan bon</p>
         </div>
 
-        <div class="form-group">
-          <label for="password">Password</label>
-          <div class="password-wrap">
-            <input type="password" id="password" placeholder="Masukkan password" required />
-            <button type="button" class="toggle-pw" id="togglePw" title="Tampilkan password">👁</button>
+        <form id="loginForm" class="login-form-v2">
+          <div class="login-field">
+            <label for="username" class="login-label">Nama Pengguna</label>
+            <div class="login-input-group">
+              <svg class="login-input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <input type="text" id="username" class="login-input" placeholder="Masukkan nama pengguna" autocomplete="off" required />
+            </div>
           </div>
+
+          <div class="login-field">
+            <label for="password" class="login-label">Kata Sandi</label>
+            <div class="login-input-group">
+              <svg class="login-input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+              <input type="password" id="password" class="login-input" placeholder="Masukkan kata sandi" required />
+              <button type="button" class="login-eye-toggle" id="togglePw">
+                <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                <svg class="eye-off-icon hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"></path>
+                  <line x1="1" y1="1" x2="23" y2="23"></line>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div id="loginError" class="login-error hidden">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <span></span>
+          </div>
+
+          <button type="submit" class="login-btn" id="loginBtn">
+            <span class="btn-text">Masuk</span>
+            <span class="btn-loader hidden">
+              <svg class="spinner" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle>
+                <path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"></path>
+              </svg>
+            </span>
+            <svg class="btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </form>
+
+        <div class="login-footer">
+          <a href="index.html" class="login-back">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            Kembali ke Beranda
+          </a>
         </div>
+      </div>
 
-        <div id="loginError" class="error-msg hidden"></div>
-
-        <button type="submit" class="btn btn-primary btn-full" id="loginBtn">Masuk</button>
-      </form>
-
-      <div class="login-footer">
-        <p>Sistem Pengajuan Bon Internal &mdash; Lapas</p>
+      <!-- Footer Info -->
+      <div class="login-footer-info">
+        <p>&copy; 2026 Sistem Pengajuan Bon - LAPAS</p>
       </div>
     </div>
-  </div>
 
+    <!-- Decorative Elements -->
+    <div class="login-deco login-deco-1"></div>
+    <div class="login-deco login-deco-2"></div>
+    <div class="login-deco login-deco-3"></div>
+  </section>
+
+  <script src="api.js"></script>
   <script>
-    const SUPA_URL = "https://pustxqgkxatslwjjmiti.supabase.co";
-    const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1c3R4cWdreGF0c2x3amptaXRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzMTA1OTUsImV4cCI6MjA5Mzg4NjU5NX0.9FcVc7yNXhFptZ1TC7Cdd9Ov8P1t8AVSywzcgF2yntQ";
+    // Already logged in → redirect
+    if (sessionStorage.getItem('user')) window.location.href = 'admin.html';
 
-    const headers = { "Content-Type": "application/json", "apikey": SUPA_KEY, "Authorization": `Bearer ${SUPA_KEY}` };
-
-    // Sudah login → langsung redirect
-    if (sessionStorage.getItem("user")) window.location.href = "index.html";
-
-    document.getElementById("togglePw").addEventListener("click", () => {
-      const pw = document.getElementById("password");
-      pw.type = pw.type === "password" ? "text" : "password";
+    // Password toggle
+    const togglePw = document.getElementById('togglePw');
+    const pwInput = document.getElementById('password');
+    togglePw.addEventListener('click', () => {
+      const isPassword = pwInput.type === 'password';
+      pwInput.type = isPassword ? 'text' : 'password';
+      togglePw.querySelector('.eye-icon').classList.toggle('hidden', !isPassword);
+      togglePw.querySelector('.eye-off-icon').classList.toggle('hidden', isPassword);
     });
 
-    // Hash SHA-256 sederhana untuk verifikasi password
-    async function sha256(message) {
-      const msgBuffer = new TextEncoder().encode(message);
-      const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
-      const hashArray  = Array.from(new Uint8Array(hashBuffer));
-      return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-    }
-
-    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+    // Login form
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const errorDiv = document.getElementById("loginError");
-      const btn      = document.getElementById("loginBtn");
-      errorDiv.classList.add("hidden");
-      btn.disabled = true;
-      btn.textContent = "Memproses...";
+      const errorDiv = document.getElementById('loginError');
+      const btn = document.getElementById('loginBtn');
+      const btnText = btn.querySelector('.btn-text');
+      const btnLoader = btn.querySelector('.btn-loader');
+      const btnIcon = btn.querySelector('.btn-icon');
 
-      const username = document.getElementById("username").value.trim();
-      const password = document.getElementById("password").value;
+      errorDiv.classList.add('hidden');
+      btn.disabled = true;
+      btnText.textContent = 'Memproses...';
+      btnLoader.classList.remove('hidden');
+      btnIcon.style.display = 'none';
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
 
       try {
-        // Cari user berdasarkan username
-        const res  = await fetch(
-          `${SUPA_URL}/rest/v1/users?username=eq.${encodeURIComponent(username)}&select=*`,
-          { headers }
-        );
-        const data = await res.json();
+        const res = await apiPost('auth/login', { username, password });
+        sessionStorage.setItem('user', JSON.stringify(res.user));
+        sessionStorage.setItem('token', res.token);
 
-        if (!data.length) throw new Error("Username atau password salah.");
-
-        const user = data[0];
-
-        // Verifikasi password: coba plain text dulu (seed awal), lalu SHA-256
-        const hash = await sha256(password);
-        const valid = (user.password_hash === password) || (user.password_hash === hash);
-        if (!valid) throw new Error("Username atau password salah.");
-
-        // Simpan session
-        sessionStorage.setItem("user", JSON.stringify({
-          id: user.id, username: user.username, role: user.role
-        }));
-
-        window.location.href = user.role === "admin" ? "admin.html" : "index.html";
+        // Redirect based on role
+        const roleRedirects = {
+          'admin': 'admin.html',
+          'ppk': 'ppk.html',
+          'kalapas': 'kalapas.html',
+          'bendahara': 'bendahara.html',
+          'pegawai': 'pegawai.html'
+        };
+        window.location.href = roleRedirects[res.user.role] || 'admin.html';
       } catch (err) {
-        errorDiv.textContent = err.message;
-        errorDiv.classList.remove("hidden");
+        errorDiv.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><span>${err.message}</span>`;
+        errorDiv.classList.remove('hidden');
         btn.disabled = false;
-        btn.textContent = "Masuk";
+        btnText.textContent = 'Masuk';
+        btnLoader.classList.add('hidden');
+        btnIcon.style.display = '';
       }
     });
   </script>
+
+  <style>
+    .login-page-v2 {
+      min-height: 100vh;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* ── Background ── */
+    .login-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+    }
+
+    .login-bg-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+
+    .login-bg-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(26, 35, 50, 0.92) 0%, rgba(26, 35, 50, 0.85) 50%, rgba(26, 35, 50, 0.95) 100%);
+    }
+
+    /* ── Content ── */
+    .login-content {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 420px;
+      padding: 40px 24px;
+      text-align: center;
+    }
+
+    /* ── Brand Top ── */
+    .login-brand-top {
+      margin-bottom: 32px;
+    }
+
+    .login-logo-large {
+      width: 100px !important;
+      height: 100px !important;
+      margin: 0 auto 20px;
+      background: var(--gold) !important;
+      border-radius: 24px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      box-shadow: 0 8px 40px rgba(201, 166, 76, 0.4);
+      animation: float 3s ease-in-out infinite;
+      overflow: hidden;
+    }
+
+    .login-logo-large img {
+      width: 56px !important;
+      height: 56px !important;
+      display: block !important;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .login-title-large {
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--white);
+      letter-spacing: 0.15em;
+      margin-bottom: 4px;
+    }
+
+    .login-subtitle-large {
+      font-size: 14px;
+      color: var(--gold);
+      font-weight: 500;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Login Card ── */
+    .login-card-v2 {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 40px 32px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .login-card-header {
+      margin-bottom: 32px;
+    }
+
+    .login-card-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 8px;
+    }
+
+    .login-card-desc {
+      font-size: 15px;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    /* ── Form ── */
+    .login-form-v2 {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .login-field {
+      text-align: left;
+    }
+
+    .login-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .login-input-group {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .login-input-icon {
+      position: absolute;
+      left: 16px;
+      color: rgba(255, 255, 255, 0.4);
+      pointer-events: none;
+    }
+
+    .login-input {
+      width: 100%;
+      padding: 16px 48px 16px 48px;
+      font-size: 15px;
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--white);
+      font-family: inherit;
+      transition: all .3s;
+    }
+
+    .login-input::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    .login-input:focus {
+      outline: none;
+      border-color: var(--gold);
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 0 4px rgba(201, 166, 76, 0.15);
+    }
+
+    .login-eye-toggle {
+      position: absolute;
+      right: 14px;
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.5);
+      cursor: pointer;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color .2s;
+    }
+
+    .login-eye-toggle:hover {
+      color: var(--gold);
+    }
+
+    .login-error {
+      padding: 14px 16px;
+      background: rgba(220, 38, 38, 0.15);
+      border: 1px solid rgba(220, 38, 38, 0.4);
+      border-radius: 12px;
+      color: #fca5a5;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .login-error.hidden {
+      display: none;
+    }
+
+    .login-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 16px 24px;
+      background: var(--gold);
+      color: var(--navy);
+      font-size: 16px;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all .3s;
+      margin-top: 8px;
+    }
+
+    .login-btn:hover:not(:disabled) {
+      background: var(--gold-lt);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(201, 166, 76, 0.4);
+    }
+
+    .login-btn:hover:not(:disabled) .btn-icon {
+      transform: translateX(4px);
+    }
+
+    .login-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    .login-btn .btn-icon {
+      transition: transform .3s;
+    }
+
+    .login-btn .spinner {
+      animation: spin 0.9s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── Footer ── */
+    .login-footer {
+      margin-top: 28px;
+      text-align: center;
+    }
+
+    .login-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 14px;
+      font-weight: 500;
+      transition: color .2s;
+      text-decoration: none;
+    }
+
+    .login-back:hover {
+      color: var(--gold);
+    }
+
+    .login-footer-info {
+      margin-top: 40px;
+    }
+
+    .login-footer-info p {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    /* ── Decorative Elements ── */
+    .login-deco {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .login-deco-1 {
+      top: -150px;
+      right: -150px;
+      width: 400px;
+      height: 400px;
+      background: var(--gold);
+      opacity: 0.05;
+    }
+
+    .login-deco-2 {
+      bottom: -200px;
+      left: -200px;
+      width: 500px;
+      height: 500px;
+      background: var(--gold);
+      opacity: 0.03;
+    }
+
+    .login-deco-3 {
+      top: 50%;
+      right: 5%;
+      width: 300px;
+      height: 300px;
+      border: 2px solid var(--gold);
+      opacity: 0.08;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 480px) {
+      .login-content {
+        padding: 24px 16px;
+      }
+
+      .login-card-v2 {
+        padding: 32px 24px;
+        border-radius: 20px;
+      }
+
+      .login-logo-large {
+        width: 80px;
+        height: 80px;
+      }
+
+      .login-logo-large img {
+        width: 48px;
+        height: 48px;
+      }
+
+      .login-title-large {
+        font-size: 28px;
+      }
+
+      .login-card-title {
+        font-size: 22px;
+      }
+
+      .login-input {
+        padding: 14px 44px 14px 44px;
+      }
+    }
+  </style>
 </body>
 </html>

@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s http://localhost/api/)",
+      "Bash(php -r \"echo phpinfo\\(\\);\")",
+      "Bash(curl -s -I \"http://localhost/api/auth/login\")",
+      "Bash(curl -s -I \"http://localhost/api/index.php/auth/login\")"
+    ]
+  }
+}

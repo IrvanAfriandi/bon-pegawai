@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bendahara - Sistem Pengajuan Bon</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+
+  <!-- ── Navbar ── -->
+  <nav class="navbar-fixed">
+    <div class="navbar-inner">
+      <a href="bendahara.html" class="navbar-brand">
+        <img src="asset/logo.png" alt="LAPAS Logo" class="navbar-logo" />
+        <span class="navbar-brand-text">LAPAS</span>
+      </a>
+
+      <div class="navbar-right">
+        <div class="admin-profile">
+          <div class="admin-profile-info">
+            <span class="admin-profile-name" id="profileName">-</span>
+            <span class="admin-profile-role" id="profileRole">-</span>
+          </div>
+          <div class="admin-profile-avatar" id="profileAvatar">-</div>
+        </div>
+        <button class="admin-logout-btn" id="logoutBtn" title="Keluar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+        </button>
+      </div>
+
+      <button class="navbar-hamburger" id="hamburger" aria-label="Menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+
+    <!-- Mobile Nav -->
+    <div class="mobile-nav" id="mobileNav">
+      <div class="mobile-profile">
+        <span class="mobile-profile-name" id="mobileProfileName">-</span>
+        <span class="mobile-profile-role" id="mobileProfileRole">-</span>
+      </div>
+      <a href="login.html" class="mobile-nav-link" id="logoutBtnMobile">Keluar</a>
+    </div>
+  </nav>
+
+  <div class="admin-layout">
+    <div class="admin-container">
+
+      <!-- ── Dashboard Header ── -->
+      <div class="dashboard-header">
+        <h1 class="dashboard-title">Dashboard Bendahara</h1>
+        <p class="dashboard-subtitle">Pencairan Dana & LPJ - LAPAS</p>
+      </div>
+
+      <!-- ── Stats Cards Row ── -->
+      <div class="stats-row">
+        <div class="stat-mini stat-card clickable" data-filter="approved_kalapas" id="cardSiapCair" style="background:rgba(139,92,246,0.1);">
+          <div class="stat-mini-icon" style="background:rgba(139,92,246,0.1);color:#8b5cf6;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
+              <path d="M7 15h0M2 9h20"></path>
+            </svg>
+          </div>
+          <div class="stat-mini-content">
+            <span class="stat-mini-value" id="totalReady">-</span>
+            <span class="stat-mini-label">Siap Cair</span>
+          </div>
+        </div>
+
+        <div class="stat-mini stat-card clickable" data-filter="disbursed" id="cardDicairkan" style="background:rgba(14,165,233,0.1);color:#0ea5e9;">
+          <div class="stat-mini-icon" style="background:rgba(14,165,233,0.1);color:#0ea5e9;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+          </div>
+          <div class="stat-mini-content">
+            <span class="stat-mini-value" id="totalDisbursed">-</span>
+            <span class="stat-mini-label">Dicairkan</span>
+          </div>
+        </div>
+
+        <div class="stat-mini stat-card clickable" data-filter="completed" id="cardSelesai" style="background:rgba(34,197,94,0.1);color:#22c55e;">
+          <div class="stat-mini-icon" style="background:rgba(34,197,94,0.1);color:#22c55e;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+          </div>
+          <div class="stat-mini-content">
+            <span class="stat-mini-value" id="totalCompleted">-</span>
+            <span class="stat-mini-label">Selesai LPJ</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Pengajuan Table ── -->
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h2 class="admin-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+            Pengajuan Siap Cair
+          </h2>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <div class="search-wrap">
+              <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <input type="text" class="search-input" id="searchInput" placeholder="Cari nama atau NIP..." />
+            </div>
+            <button class="btn btn-outline btn-sm" id="refreshBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+              Refresh
+            </button>
+          </div>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Nama Pegawai</th>
+                <th>NIP</th>
+                <th>Total</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <tr class="admin-empty-row"><td colspan="5">Memuat data...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Detail Modal ── -->
+  <div class="modal-overlay" id="detailModal">
+    <div class="modal-box" style="max-width:600px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Detail Pengajuan</h3>
+        <button class="modal-close" id="closeDetailModal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div id="detailContent"></div>
+    </div>
+  </div>
+
+  <!-- ── Upload LPJ Modal ── -->
+  <div class="modal-overlay" id="lpjModal">
+    <div class="modal-box" style="max-width:400px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Upload LPJ</h3>
+        <button class="modal-close" id="closeLpjModal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <form id="lpjForm">
+        <div class="form-group">
+          <label class="form-label">Deskripsi LPJ</label>
+          <textarea id="lpjDescription" class="form-input" rows="3" placeholder="Deskripsi pertanggungjawaban..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">File LPJ (PDF, JPG, PNG)</label>
+          <input type="file" id="lpjFile" class="form-input" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" id="cancelLpjBtn">Batal</button>
+          <button type="submit" class="btn btn-sm" style="background:#22c55e;color:#fff;">Upload</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="api.js"></script>
+  <script>
+    // Auth guard
+    const userRaw = sessionStorage.getItem('user');
+    if (!userRaw) window.location.href = 'login.html';
+    const me = JSON.parse(userRaw);
+    if (me.role !== 'bendahara') window.location.href = 'index.html';
+
+    // Helper functions
+    function escHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str || '';
+      return div.innerHTML;
+    }
+
+    function formatRupiah(num) {
+      return 'Rp ' + Number(num).toLocaleString('id-ID');
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '-';
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+
+    // Show profile
+    document.getElementById('profileName').textContent = me.username;
+    document.getElementById('profileRole').textContent = 'Bendahara';
+    document.getElementById('profileAvatar').textContent = me.username.charAt(0).toUpperCase();
+    document.getElementById('mobileProfileName').textContent = me.username;
+    document.getElementById('mobileProfileRole').textContent = 'Bendahara';
+
+    // Mobile menu
+    document.getElementById('hamburger').addEventListener('click', () => {
+      document.getElementById('hamburger').classList.toggle('active');
+      document.getElementById('mobileNav').classList.toggle('active');
+    });
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      sessionStorage.removeItem('user');
+      sessionStorage.removeItem('token');
+      window.location.href = 'login.html';
+    });
+    document.getElementById('logoutBtnMobile').addEventListener('click', () => {
+      sessionStorage.removeItem('user');
+      sessionStorage.removeItem('token');
+      window.location.href = 'login.html';
+    });
+
+    // State
+    let currentBonId = null;
+    let allBons = [];
+    let currentFilter = 'approved_kalapas';
+    let searchQuery = '';
+
+    // Card click handlers
+    document.querySelectorAll('.stat-card').forEach(card => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        currentFilter = card.dataset.filter;
+        searchQuery = '';
+        document.getElementById('searchInput').value = '';
+        updateTableTitle();
+        renderTable();
+      });
+    });
+
+    function updateTableTitle() {
+      const titles = {
+        'approved_kalapas': 'Pengajuan Siap Cair',
+        'disbursed': 'Pengajuan Dicairkan',
+        'completed': 'Pengajuan Selesai LPJ'
+      };
+      document.querySelector('.admin-card-title').innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+        ${titles[currentFilter]}
+      `;
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('tableBody');
+
+      let filtered = allBons.filter(b => b.status === currentFilter);
+
+      // Apply search filter
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        filtered = filtered.filter(b =>
+          (b.applicant_name && b.applicant_name.toLowerCase().includes(q)) ||
+          (b.applicant_nip && b.applicant_nip.toLowerCase().includes(q))
+        );
+      }
+
+      if (!filtered.length) {
+        const emptyMessages = {
+          'approved_kalapas': 'Tidak ada pengajuan siap cair.',
+          'disbursed': 'Tidak ada pengajuan yang dicairkan.',
+          'completed': 'Tidak ada pengajuan selesai LPJ.'
+        };
+        tbody.innerHTML = `<tr class="admin-empty-row"><td colspan="5">${searchQuery ? 'Tidak ada hasil untuk "' + escHtml(searchQuery) + '"' : emptyMessages[currentFilter]}</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map((b, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td><strong>${escHtml(b.applicant_name)}</strong></td>
+          <td style="font-family:monospace;font-size:13px;">${escHtml(b.applicant_nip)}</td>
+          <td>${formatRupiah(b.total_amount)}</td>
+          <td>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn btn-outline btn-sm" onclick="showDetail(${b.id})">Detail</button>
+              ${currentFilter === 'approved_kalapas' ? `<button class="btn btn-sm" style="background:#8b5cf6;color:#fff;" onclick="disbursedBon(${b.id})">Cairkan</button>` : ''}
+              ${currentFilter === 'disbursed' ? `<button class="btn btn-sm" style="background:#22c55e;color:#fff;" onclick="openLpjModal(${b.id})">Upload LPJ</button>` : ''}
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // Search handler
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      searchQuery = e.target.value.trim();
+      renderTable();
+    });
+
+    // Modals
+    const detailModal = document.getElementById('detailModal');
+    const lpjModal = document.getElementById('lpjModal');
+
+    document.getElementById('closeDetailModal').addEventListener('click', () => detailModal.classList.remove('active'));
+    document.getElementById('closeLpjModal').addEventListener('click', () => lpjModal.classList.remove('active'));
+    document.getElementById('cancelLpjBtn').addEventListener('click', () => lpjModal.classList.remove('active'));
+
+    // Load data
+    async function loadData() {
+      try {
+        const bons = await apiGet('bon/get');
+        allBons = bons;
+
+        // Filter counts
+        const ready = bons.filter(b => b.status === 'approved_kalapas');
+        const disbursed = bons.filter(b => b.status === 'disbursed');
+        const completed = bons.filter(b => b.status === 'completed');
+
+        document.getElementById('totalReady').textContent = ready.length;
+        document.getElementById('totalDisbursed').textContent = disbursed.length;
+        document.getElementById('totalCompleted').textContent = completed.length;
+
+        renderTable();
+      } catch (err) {
+        document.getElementById('tableBody').innerHTML = '<tr class="admin-empty-row"><td colspan="5">Gagal memuat data.</td></tr>';
+      }
+    }
+
+    window.showDetail = function(id) {
+      const bon = allBons.find(b => b.id === id);
+      if (!bon) return;
+
+      currentBonId = id;
+
+      let approvalInfo = '';
+      if (bon.status === 'approved_kalapas') {
+        approvalInfo = '<div style="margin-top:12px;padding:8px 12px;background:rgba(139,92,246,0.1);border-radius:8px;border-left:4px solid #8b5cf6;"><small style="color:#8b5cf6;font-weight:600;">✓ Disetujui Kalapas - Siap dicairkan</small></div>';
+      } else if (bon.status === 'disbursed') {
+        approvalInfo = '<div style="margin-top:12px;padding:8px 12px;background:rgba(14,165,233,0.1);border-radius:8px;border-left:4px solid #0ea5e9;"><small style="color:#0ea5e9;font-weight:600;">✓ Dana telah dicairkan - Menunggu LPJ</small></div>';
+      } else if (bon.status === 'completed') {
+        approvalInfo = '<div style="margin-top:12px;padding:8px 12px;background:rgba(34,197,94,0.1);border-radius:8px;border-left:4px solid #22c55e;"><small style="color:#22c55e;font-weight:600;">✓ Selesai</small></div>';
+      }
+
+      document.getElementById('detailContent').innerHTML = `
+        <div style="margin-bottom:16px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div>
+              <label style="font-size:12px;color:var(--muted);">Nama</label>
+              <p style="font-weight:600;">${escHtml(bon.applicant_name)}</p>
+            </div>
+            <div>
+              <label style="font-size:12px;color:var(--muted);">NIP</label>
+              <p style="font-weight:600;font-family:monospace;">${escHtml(bon.applicant_nip)}</p>
+            </div>
+            <div>
+              <label style="font-size:12px;color:var(--muted);">Total</label>
+              <p style="font-weight:600;color:#8b5cf6;">${formatRupiah(bon.total_amount)}</p>
+            </div>
+            <div>
+              <label style="font-size:12px;color:var(--muted);">Tanggal</label>
+              <p style="font-weight:600;">${formatDate(bon.created_at)}</p>
+            </div>
+          </div>
+          ${approvalInfo}
+        </div>
+        <div style="margin-top:16px;">
+          <label style="font-size:12px;color:var(--muted);font-weight:600;">Rincian Kebutuhan</label>
+          <div style="margin-top:8px;border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+            ${bon.items.map(item => `
+              <div style="padding:12px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr auto;">
+                <div>
+                  <div style="font-weight:600;">${escHtml(item.name)}</div>
+                  <div style="font-size:12px;color:var(--muted);">${escHtml(item.purpose)}</div>
+                </div>
+                <div style="font-weight:600;color:#8b5cf6;">${formatRupiah(item.amount)}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+
+      detailModal.classList.add('active');
+    };
+
+    window.disbursedBon = async function(id) {
+      try {
+        await apiPatch('bon/update-status', { id, status: 'disbursed' });
+        await Swal.fire({ title: 'Berhasil!', text: 'Dana telah dicairkan.', icon: 'success', timer: 1500, showConfirmButton: false });
+        loadData();
+      } catch (err) {
+        Swal.fire({ title: 'Error', text: err.message, icon: 'error' });
+      }
+    };
+
+    window.openLpjModal = function(id) {
+      currentBonId = id;
+      lpjModal.classList.add('active');
+    };
+
+    // LPJ Form submit
+    document.getElementById('lpjForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const description = document.getElementById('lpjDescription').value.trim();
+      const fileInput = document.getElementById('lpjFile');
+
+      if (!description) {
+        Swal.fire({ title: 'Validasi', text: 'Deskripsi LPJ wajib diisi.', icon: 'warning' });
+        return;
+      }
+
+      if (!fileInput.files.length) {
+        Swal.fire({ title: 'Validasi', text: 'File LPJ wajib diunggah.', icon: 'warning' });
+        return;
+      }
+
+      const form = new FormData();
+      form.append('id', currentBonId);
+      form.append('description', description);
+      form.append('file', fileInput.files[0]);
+
+      try {
+        const res = await fetch(API_BASE + 'lpj/upload', {
+          method: 'POST',
+          body: form
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Upload gagal');
+
+        await Swal.fire({ title: 'Berhasil!', text: 'LPJ berhasil diunggah.', icon: 'success', timer: 1500, showConfirmButton: false });
+        lpjModal.classList.remove('active');
+        document.getElementById('lpjForm').reset();
+        loadData();
+      } catch (err) {
+        Swal.fire({ title: 'Error', text: err.message, icon: 'error' });
+      }
+    });
+
+    document.getElementById('refreshBtn').addEventListener('click', loadData);
+
+    // Init
+    document.getElementById('cardSiapCair').classList.add('active');
+    loadData();
+  </script>
+
+  <style>
+    .admin-layout {
+      padding-top: 64px;
+      min-height: 100vh;
+      background: var(--off-wh);
+    }
+
+    .navbar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+    }
+
+    @media (max-width: 768px) {
+      .navbar-right { display: none; }
+      .mobile-nav { display: none; }
+      .mobile-nav.active { display: flex; }
+    }
+
+    .admin-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 16px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 8px;
+    }
+
+    .admin-profile-info {
+      display: flex;
+      flex-direction: column;
+      text-align: right;
+    }
+
+    .admin-profile-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--white);
+    }
+
+    .admin-profile-role {
+      font-size: 11px;
+      color: var(--gold);
+      font-weight: 500;
+    }
+
+    .admin-profile-avatar {
+      width: 36px;
+      height: 36px;
+      background: var(--gold);
+      color: var(--navy);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .admin-logout-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      background: rgba(255,255,255,0.08);
+      border: none;
+      border-radius: 8px;
+      color: rgba(255,255,255,0.7);
+      cursor: pointer;
+    }
+
+    .admin-logout-btn:hover {
+      background: #dc2626;
+      color: var(--white);
+    }
+
+    .mobile-profile {
+      padding: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 8px;
+    }
+
+    .mobile-profile-name {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--white);
+    }
+
+    .mobile-profile-role {
+      display: block;
+      font-size: 12px;
+      color: var(--gold);
+      margin-top: 4px;
+    }
+
+    .dashboard-header {
+      margin-bottom: 28px;
+    }
+
+    .dashboard-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .dashboard-subtitle {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-mini {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      border: 1px solid var(--border);
+    }
+
+    .stat-mini-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .stat-mini-content {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-mini-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.1;
+    }
+
+    .stat-mini-label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    .stat-card.clickable { cursor: pointer; transition: all .2s; }
+    .stat-card.clickable:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .stat-card.clickable.active { border-color: #8b5cf6; box-shadow: 0 0 0 2px rgba(139,92,246,0.2); }
+
+    /* Search */
+    .search-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      color: var(--muted);
+      pointer-events: none;
+    }
+    .search-input {
+      padding: 8px 12px 8px 36px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+      width: 200px;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .search-input:focus {
+      border-color: #8b5cf6;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .3s;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal-box {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 28px;
+      width: 100%;
+      max-width: 420px;
+      margin: 16px;
+      transform: translateY(20px);
+      transition: transform .3s;
+    }
+
+    .modal-overlay.active .modal-box {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      padding: 4px;
+      border-radius: 6px;
+      display: flex;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 24px;
+    }
+
+    @media (max-width: 480px) {
+      .stats-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</body>
+</html>
